@@ -24,6 +24,7 @@ interface TeamTableProps {
   teams: Team[];
   onEdit: (team: Team) => void;
   onDelete: (id: string) => void;
+  isAdmin?: boolean;
 }
 
 const getRankStyle = (rank: number) => {
@@ -46,7 +47,7 @@ const getRankIcon = (rank: number) => {
   return null;
 };
 
-export function TeamTable({ teams, onEdit, onDelete }: TeamTableProps) {
+export function TeamTable({ teams, onEdit, onDelete, isAdmin = false }: TeamTableProps) {
   // Sort teams by points (descending), then by wins
   const sortedTeams = [...teams].sort((a, b) => {
     if (b.points !== a.points) return b.points - a.points;
@@ -73,21 +74,25 @@ export function TeamTable({ teams, onEdit, onDelete }: TeamTableProps) {
             <TableHead className="w-24 text-center font-display text-xs uppercase tracking-widest text-primary">
               Points
             </TableHead>
-            <TableHead className="w-28 text-center font-display text-xs uppercase tracking-widest text-muted-foreground">
-              Actions
-            </TableHead>
+            {isAdmin && (
+              <TableHead className="w-28 text-center font-display text-xs uppercase tracking-widest text-muted-foreground">
+                Actions
+              </TableHead>
+            )}
           </TableRow>
         </TableHeader>
         <TableBody>
           {sortedTeams.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} className="h-32 text-center">
+              <TableCell colSpan={isAdmin ? 6 : 5} className="h-32 text-center">
                 <p className="text-muted-foreground font-body text-lg">
                   No teams registered yet
                 </p>
-                <p className="text-muted-foreground/60 text-sm mt-1">
-                  Add your first team to get started
-                </p>
+                {isAdmin && (
+                  <p className="text-muted-foreground/60 text-sm mt-1">
+                    Add your first team to get started
+                  </p>
+                )}
               </TableCell>
             </TableRow>
           ) : (
@@ -162,26 +167,28 @@ export function TeamTable({ teams, onEdit, onDelete }: TeamTableProps) {
                       {team.points}
                     </span>
                   </TableCell>
-                  <TableCell>
-                    <div className="flex items-center justify-center gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => onEdit(team)}
-                        className="h-8 w-8 hover:bg-neon-cyan/20 hover:text-neon-cyan transition-colors"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => onDelete(team.id)}
-                        className="h-8 w-8 hover:bg-destructive/20 hover:text-destructive transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
+                  {isAdmin && (
+                    <TableCell>
+                      <div className="flex items-center justify-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => onEdit(team)}
+                          className="h-8 w-8 hover:bg-neon-cyan/20 hover:text-neon-cyan transition-colors"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => onDelete(team.id)}
+                          className="h-8 w-8 hover:bg-destructive/20 hover:text-destructive transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  )}
                 </TableRow>
               );
             })
