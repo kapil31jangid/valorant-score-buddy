@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { Plus, Trophy, Users, Gamepad2 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Plus, Trophy, Users, Gamepad2, Shield, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TeamTable } from "@/components/TeamTable";
 import { TeamFormDialog } from "@/components/TeamFormDialog";
 import { useTeams } from "@/hooks/useTeams";
+import { useAuth } from "@/hooks/useAuth";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,6 +16,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
 
 interface Team {
   id: string;
@@ -26,6 +29,8 @@ interface Team {
 
 const Index = () => {
   const { teams, loading, addTeam, updateTeam, deleteTeam } = useTeams();
+  const { user, isAdmin, signOut, loading: authLoading } = useAuth();
+  const { toast } = useToast();
   const [formOpen, setFormOpen] = useState(false);
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -43,6 +48,22 @@ const Index = () => {
     if (deleteId) {
       await deleteTeam(deleteId);
       setDeleteId(null);
+    }
+  };
+
+  const handleSignOut = async () => {
+    const { error } = await signOut();
+    if (error) {
+      toast({
+        title: "Error signing out",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Signed out",
+        description: "You have been signed out successfully.",
+      });
     }
   };
 
@@ -80,6 +101,42 @@ const Index = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent pointer-events-none" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-primary/20 blur-[120px] rounded-full pointer-events-none" />
         
+        {/* Admin bar */}
+        <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
+          {!authLoading && (
+            <>
+              {user && isAdmin ? (
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 bg-primary/20 border border-primary/30 rounded-sm px-3 py-1.5">
+                    <Shield className="w-4 h-4 text-primary" />
+                    <span className="text-xs font-display uppercase tracking-wider text-primary">Admin</span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleSignOut}
+                    className="text-xs font-display uppercase tracking-wider hover:bg-destructive/20 hover:text-destructive"
+                  >
+                    <LogOut className="w-4 h-4 mr-1" />
+                    Sign Out
+                  </Button>
+                </div>
+              ) : (
+                <Link to="/auth">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs font-display uppercase tracking-wider hover:bg-primary/20 hover:text-primary"
+                  >
+                    <Shield className="w-4 h-4 mr-1" />
+                    Admin Login
+                  </Button>
+                </Link>
+              )}
+            </>
+          )}
+        </div>
+
         <div className="container mx-auto px-4 py-12 relative">
           <div className="flex flex-col items-center text-center mb-8">
             <div className="flex items-center gap-3 mb-4">
@@ -149,21 +206,24 @@ const Index = () => {
             <h2 className="font-display text-2xl tracking-wider text-foreground">
               Team Standings
             </h2>
-            <p className="text-muted-foreground text-sm">
+          <p className="text-muted-foreground text-sm">
               Live tournament rankings • Auto-updates in real-time
+              {!isAdmin && " • View only mode"}
             </p>
           </div>
 
-          <Button
-            onClick={() => {
-              setEditingTeam(null);
-              setFormOpen(true);
-            }}
-            className="bg-primary hover:bg-primary/90 font-display uppercase tracking-wider clip-angle-sm"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Add Team
-          </Button>
+          {isAdmin && (
+            <Button
+              onClick={() => {
+                setEditingTeam(null);
+                setFormOpen(true);
+              }}
+              className="bg-primary hover:bg-primary/90 font-display uppercase tracking-wider clip-angle-sm"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Team
+            </Button>
+          )}
         </div>
 
         {loading ? (
@@ -177,6 +237,7 @@ const Index = () => {
             teams={teams}
             onEdit={handleEdit}
             onDelete={handleDelete}
+            isAdmin={isAdmin}
           />
         )}
       </div>
