@@ -16,8 +16,9 @@ const authSchema = z.object({
 const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user, signIn, signUp } = useAuth();
+  const { user, signIn, signUp, resetPassword } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -44,6 +45,39 @@ const Auth = () => {
     }
     setErrors({});
     return true;
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const emailResult = z.string().email("Please enter a valid email address").safeParse(email);
+    if (!emailResult.success) {
+      setErrors({ email: emailResult.error.errors[0].message });
+      return;
+    }
+    setErrors({});
+    
+    setLoading(true);
+
+    try {
+      const { error } = await resetPassword(email);
+      
+      if (error) {
+        toast({
+          title: "Password reset failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Check your email",
+          description: "We've sent you a password reset link.",
+        });
+        setIsForgotPassword(false);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -124,13 +158,62 @@ const Auth = () => {
               </h1>
             </div>
             <p className="text-muted-foreground text-sm">
-              {isLogin
-                ? "Sign in to manage tournament scores"
-                : "Create an admin account to edit scores"}
+              {isForgotPassword
+                ? "Enter your email to receive a reset link"
+                : isLogin
+                  ? "Sign in to manage tournament scores"
+                  : "Create an admin account to edit scores"}
             </p>
           </div>
 
-          {/* Form */}
+          {/* Forgot Password Form */}
+          {isForgotPassword ? (
+            <form onSubmit={handleForgotPassword} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="email" className="font-display text-xs uppercase tracking-widest">
+                  Email
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="admin@example.com"
+                  className="bg-background/50 border-border focus:border-primary"
+                  disabled={loading}
+                />
+                {errors.email && (
+                  <p className="text-destructive text-xs mt-1">{errors.email}</p>
+                )}
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full bg-primary hover:bg-primary/90 font-display uppercase tracking-wider clip-angle-sm"
+                disabled={loading}
+              >
+                {loading ? (
+                  <div className="flex items-center gap-2">
+                    <Gamepad2 className="w-4 h-4 animate-pulse" />
+                    Sending...
+                  </div>
+                ) : (
+                  "Send Reset Link"
+                )}
+              </Button>
+
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => setIsForgotPassword(false)}
+                  className="text-primary hover:text-primary/80 font-display uppercase tracking-wider text-xs"
+                >
+                  ← Back to Login
+                </button>
+              </div>
+            </form>
+          ) : (
+          /* Login/Signup Form */
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="email" className="font-display text-xs uppercase tracking-widest">
@@ -177,6 +260,18 @@ const Auth = () => {
               )}
             </div>
 
+            {isLogin && (
+              <div className="text-right">
+                <button
+                  type="button"
+                  onClick={() => setIsForgotPassword(true)}
+                  className="text-muted-foreground hover:text-primary text-xs"
+                >
+                  Forgot password?
+                </button>
+              </div>
+            )}
+
             <Button
               type="submit"
               className="w-full bg-primary hover:bg-primary/90 font-display uppercase tracking-wider clip-angle-sm"
@@ -192,20 +287,23 @@ const Auth = () => {
               )}
             </Button>
           </form>
+          )}
 
           {/* Toggle */}
-          <div className="mt-6 text-center">
-            <p className="text-muted-foreground text-sm">
-              {isLogin ? "Don't have an account?" : "Already have an account?"}
-              <button
-                type="button"
-                onClick={() => setIsLogin(!isLogin)}
-                className="ml-2 text-primary hover:text-primary/80 font-display uppercase tracking-wider text-xs"
-              >
-                {isLogin ? "Sign Up" : "Sign In"}
-              </button>
-            </p>
-          </div>
+          {!isForgotPassword && (
+            <div className="mt-6 text-center">
+              <p className="text-muted-foreground text-sm">
+                {isLogin ? "Don't have an account?" : "Already have an account?"}
+                <button
+                  type="button"
+                  onClick={() => setIsLogin(!isLogin)}
+                  className="ml-2 text-primary hover:text-primary/80 font-display uppercase tracking-wider text-xs"
+                >
+                  {isLogin ? "Sign Up" : "Sign In"}
+                </button>
+              </p>
+            </div>
+          )}
 
           {/* Back link */}
           <div className="mt-4 text-center">
