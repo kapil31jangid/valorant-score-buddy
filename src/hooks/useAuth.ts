@@ -78,8 +78,9 @@ export function useAuth() {
 
     if (error) return { error };
 
-    // Assign admin role to new user
-    if (data.user) {
+    // Only assign admin role to the designated admin email
+    const ADMIN_EMAIL = "kapil31jangid@gmail.com";
+    if (data.user && email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
       const { error: roleError } = await supabase
         .from("user_roles")
         .insert([{ user_id: data.user.id, role: "admin" }]);
