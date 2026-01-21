@@ -52,7 +52,7 @@ const Index = () => {
                 <MapPin className="w-5 h-5 text-valorant-red" />
                 <div className="text-left">
                   <p className="text-xs text-muted-foreground font-display uppercase tracking-wider">Venue</p>
-                  <p className="text-sm font-display text-foreground">Gaming Arena, Main Hall</p>
+                  <p className="text-sm font-display text-foreground">Silver Oak University</p>
                 </div>
               </div>
               
@@ -60,7 +60,7 @@ const Index = () => {
                 <Calendar className="w-5 h-5 text-neon-cyan" />
                 <div className="text-left">
                   <p className="text-xs text-muted-foreground font-display uppercase tracking-wider">Date & Time</p>
-                  <p className="text-sm font-display text-foreground">Feb 15, 2026 • 10:00 AM</p>
+                  <p className="text-sm font-display text-foreground">29 January 2026</p>
                 </div>
               </div>
             </div>
