@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Trophy, Swords, Target, ExternalLink } from "lucide-react";
+import { Trophy, Swords, Target, ExternalLink, MapPin, Calendar } from "lucide-react";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import valorantAgents from "@/assets/valorant-agents-lineup.jpg";
 
@@ -42,9 +42,28 @@ const Index = () => {
               <span className="text-foreground">ESPORTS</span>
             </h1>
             
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8 font-body">
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-6 font-body">
               Track your tournament standings, view match history, and compete for glory
             </p>
+
+            {/* Venue & Time Details */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 mb-8">
+              <div className="flex items-center gap-2 bg-card/50 backdrop-blur-sm border border-border/50 rounded-lg px-4 py-3">
+                <MapPin className="w-5 h-5 text-valorant-red" />
+                <div className="text-left">
+                  <p className="text-xs text-muted-foreground font-display uppercase tracking-wider">Venue</p>
+                  <p className="text-sm font-display text-foreground">Gaming Arena, Main Hall</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-2 bg-card/50 backdrop-blur-sm border border-border/50 rounded-lg px-4 py-3">
+                <Calendar className="w-5 h-5 text-neon-cyan" />
+                <div className="text-left">
+                  <p className="text-xs text-muted-foreground font-display uppercase tracking-wider">Date & Time</p>
+                  <p className="text-sm font-display text-foreground">Feb 15, 2026 • 10:00 AM</p>
+                </div>
+              </div>
+            </div>
             
             <Button 
               asChild
