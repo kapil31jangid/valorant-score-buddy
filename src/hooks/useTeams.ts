@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
-interface Team {
+export interface Team {
   id: string;
   name: string;
   logo_url: string | null;
