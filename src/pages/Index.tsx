@@ -60,7 +60,7 @@ const Index = () => {
                 <Calendar className="w-5 h-5 text-neon-cyan" />
                 <div className="text-left">
                   <p className="text-xs text-muted-foreground font-display uppercase tracking-wider">Date & Time</p>
-                  <p className="text-sm font-display text-foreground">29 January 2026</p>
+                  <p className="text-sm font-display text-foreground">29 January 2026 • 11:00 AM ONWARDS</p>
                 </div>
               </div>
             </div>
