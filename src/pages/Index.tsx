@@ -168,7 +168,7 @@ const Index = () => {
         <footer className="py-6 px-4 border-t border-border/30">
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-sm text-muted-foreground font-body">
-              © 2026 Valorant Esports Tournament
+              © IEEE SOU SB
             </p>
             
             {/* Social Links */}
@@ -200,7 +200,7 @@ const Index = () => {
             
             <div className="flex items-center gap-6">
               <span className="text-xs text-muted-foreground/60 font-display tracking-wider uppercase">
-                Powered by Lovable
+                Powered by Silver Oak University
               </span>
             </div>
           </div>
