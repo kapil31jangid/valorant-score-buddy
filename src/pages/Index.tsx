@@ -108,9 +108,9 @@ const Index = () => {
             </div>
             
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-display font-bold mb-4 tracking-tight">
-              <span className="text-glow-red text-valorant-red">VALORANT</span>
+              <span className="text-glow-red text-valorant-red">CYBER</span>
               <br />
-              <span className="text-foreground">ESPORTS</span>
+              <span className="text-foreground">CLUTCH 4.0</span>
             </h1>
             
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-6 font-body">
