@@ -138,23 +138,26 @@ const Index = () => {
         </div>
 
         <div className="container mx-auto px-4 py-12 relative">
-          <div className="flex flex-col items-center text-center mb-8">
+          <div className="flex flex-col items-center text-center mb-8 animate-fade-in-up">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-primary clip-angle flex items-center justify-center">
+              <div className="w-12 h-12 bg-primary clip-angle flex items-center justify-center animate-neon-pulse">
                 <Gamepad2 className="w-7 h-7 text-primary-foreground" />
               </div>
-              <h1 className="font-display text-4xl md:text-5xl font-bold tracking-wider text-glow-red">
+              <h1 
+                className="font-display text-4xl md:text-5xl font-bold tracking-wider text-glow-red glitch-text" 
+                data-text="VALORANT"
+              >
                 VALORANT
               </h1>
             </div>
-            <p className="font-display text-xl md:text-2xl text-muted-foreground tracking-[0.3em] uppercase">
+            <p className="font-display text-xl md:text-2xl text-muted-foreground tracking-[0.3em] uppercase animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
               Tournament Scoreboard
             </p>
           </div>
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto">
-            <div className="bg-card/50 backdrop-blur-sm border border-border rounded-sm p-4 clip-angle">
+            <div className="bg-card/50 backdrop-blur-sm border border-border rounded-sm p-4 clip-angle hover-glow-cyan transition-all duration-300 hover:scale-105 opacity-0 animate-fade-in-up" style={{ animationDelay: '0.3s', animationFillMode: 'forwards' }}>
               <div className="flex items-center gap-3">
                 <Users className="w-8 h-8 text-neon-cyan" />
                 <div>
@@ -168,7 +171,7 @@ const Index = () => {
               </div>
             </div>
 
-            <div className="bg-card/50 backdrop-blur-sm border border-border rounded-sm p-4 clip-angle">
+            <div className="bg-card/50 backdrop-blur-sm border border-border rounded-sm p-4 clip-angle hover-glow-red transition-all duration-300 hover:scale-105 opacity-0 animate-fade-in-up" style={{ animationDelay: '0.4s', animationFillMode: 'forwards' }}>
               <div className="flex items-center gap-3">
                 <Gamepad2 className="w-8 h-8 text-primary" />
                 <div>
@@ -182,9 +185,9 @@ const Index = () => {
               </div>
             </div>
 
-            <div className="bg-card/50 backdrop-blur-sm border border-border rounded-sm p-4 clip-angle">
+            <div className="bg-card/50 backdrop-blur-sm border border-border rounded-sm p-4 clip-angle hover-glow-red transition-all duration-300 hover:scale-105 opacity-0 animate-fade-in-up" style={{ animationDelay: '0.5s', animationFillMode: 'forwards' }}>
               <div className="flex items-center gap-3">
-                <Trophy className="w-8 h-8 text-rank-gold" />
+                <Trophy className="w-8 h-8 text-rank-gold animate-pulse-glow" />
                 <div>
                   <p className="text-xs font-display uppercase tracking-widest text-muted-foreground">
                     Leading Team
@@ -218,7 +221,7 @@ const Index = () => {
                 setEditingTeam(null);
                 setFormOpen(true);
               }}
-              className="bg-primary hover:bg-primary/90 font-display uppercase tracking-wider clip-angle-sm"
+              className="bg-primary hover:bg-primary/90 font-display uppercase tracking-wider clip-angle-sm animate-neon-pulse hover:animate-none transition-all duration-300 hover:scale-105"
             >
               <Plus className="w-4 h-4 mr-2" />
               Add Team
