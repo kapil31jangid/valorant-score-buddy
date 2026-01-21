@@ -51,7 +51,7 @@ const Index = () => {
               size="lg"
               className="bg-valorant-red hover:bg-valorant-red/90 text-white font-display text-lg px-8 py-6 clip-angle hover-glow-red transition-all duration-300 group"
             >
-              <a href="https://forms.google.com" target="_blank" rel="noopener noreferrer">
+              <a href="https://docs.google.com/forms/d/e/1FAIpQLSfBNQ4XFBX1p1FYLY5k-tLMZuRXc7me05Jwd2xXjLyKHcEyFA/viewform" target="_blank" rel="noopener noreferrer">
                 <Swords className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
                 REGISTER NOW
                 <ExternalLink className="w-4 h-4 ml-2 group-hover:scale-110 transition-transform" />
