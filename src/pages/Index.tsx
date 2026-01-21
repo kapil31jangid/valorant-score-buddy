@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Trophy, Swords, Target } from "lucide-react";
+import { Trophy, Swords, Target, ExternalLink } from "lucide-react";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import valorantAgents from "@/assets/valorant-agents-lineup.jpg";
 
@@ -13,6 +13,19 @@ const Index = () => {
       
       {/* Content */}
       <div className="relative z-10 min-h-screen flex flex-col">
+        {/* Top Navigation */}
+        <nav className="absolute top-4 left-4 z-20">
+          <Button 
+            onClick={() => navigate('/scoreboard')}
+            variant="outline"
+            size="sm"
+            className="border-valorant-red/50 text-valorant-red hover:bg-valorant-red/10 font-display text-xs"
+          >
+            <Trophy className="w-3 h-3 mr-1" />
+            SCOREBOARD
+          </Button>
+        </nav>
+
         {/* Hero Section */}
         <header className="pt-8 pb-4 px-4">
           <div className="max-w-7xl mx-auto text-center">
@@ -34,13 +47,15 @@ const Index = () => {
             </p>
             
             <Button 
-              onClick={() => navigate('/scoreboard')}
+              asChild
               size="lg"
               className="bg-valorant-red hover:bg-valorant-red/90 text-white font-display text-lg px-8 py-6 clip-angle hover-glow-red transition-all duration-300 group"
             >
-              <Trophy className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
-              VIEW SCOREBOARD
-              <Swords className="w-5 h-5 ml-2 group-hover:scale-110 transition-transform" />
+              <a href="https://forms.google.com" target="_blank" rel="noopener noreferrer">
+                <Swords className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
+                REGISTER NOW
+                <ExternalLink className="w-4 h-4 ml-2 group-hover:scale-110 transition-transform" />
+              </a>
             </Button>
           </div>
         </header>
