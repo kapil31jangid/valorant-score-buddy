@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Trophy, Swords, Target, ExternalLink, MapPin, Calendar, Mail, Shield, LogOut, Eye, EyeOff } from "lucide-react";
+import { Trophy, Swords, Target, ExternalLink, MapPin, Calendar, Shield, LogOut, Eye, EyeOff } from "lucide-react";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { useAuth } from "@/hooks/useAuth";
 import { useEventSettings } from "@/hooks/useEventSettings";
@@ -174,7 +174,7 @@ const Index = () => {
             {/* Social Links */}
             <div className="flex items-center gap-4">
               <a 
-                href="https://linkedin.com/in/your-profile" 
+                href="https://www.linkedin.com/company/ieee-silveroakuni/" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 text-muted-foreground hover:text-[#0A66C2] transition-colors"
@@ -186,7 +186,7 @@ const Index = () => {
               </a>
               
               <a 
-                href="https://instagram.com/your-account" 
+                href="https://www.instagram.com/ieee_silveroakuni/?hl=en" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 text-muted-foreground hover:text-[#E4405F] transition-colors"
@@ -195,17 +195,6 @@ const Index = () => {
                   <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/>
                 </svg>
                 <span className="text-xs font-display uppercase tracking-wider">Instagram</span>
-              </a>
-
-              <div className="w-px h-4 bg-border" />
-              
-              {/* Help Section */}
-              <a 
-                href="mailto:help@tournament.com" 
-                className="flex items-center gap-2 text-muted-foreground hover:text-valorant-red transition-colors"
-              >
-                <Mail className="w-4 h-4" />
-                <span className="text-xs font-display uppercase tracking-wider">Need Help?</span>
               </a>
             </div>
             
