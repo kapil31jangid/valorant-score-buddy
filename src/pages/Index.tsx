@@ -1,12 +1,30 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Trophy, Swords, Target, ExternalLink, MapPin, Calendar, Mail } from "lucide-react";
+import { Trophy, Swords, Target, ExternalLink, MapPin, Calendar, Mail, Shield, LogOut, Eye, EyeOff } from "lucide-react";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
+import { useAuth } from "@/hooks/useAuth";
+import { useEventSettings } from "@/hooks/useEventSettings";
+import { toast } from "sonner";
 import valorantAgents from "@/assets/valorant-agents-lineup.jpg";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { user, isAdmin, loading, signOut } = useAuth();
+  const { isEventActive, toggleEventStatus } = useEventSettings();
 
+  const handleSignOut = async () => {
+    const { error } = await signOut();
+    if (error) {
+      toast.error("Error signing out");
+    } else {
+      toast.success("Signed out successfully");
+    }
+  };
+
+  const handleToggleEvent = async () => {
+    await toggleEventStatus();
+    toast.success(isEventActive ? "Scoreboard is now hidden" : "Scoreboard is now public");
+  };
   return (
     <div className="min-h-screen relative overflow-hidden bg-background">
       <AnimatedBackground />
@@ -14,7 +32,7 @@ const Index = () => {
       {/* Content */}
       <div className="relative z-10 min-h-screen flex flex-col">
         {/* Top Navigation */}
-        <nav className="absolute top-4 left-4 z-20">
+        <nav className="absolute top-4 left-4 right-4 z-20 flex items-center justify-between">
           <Button 
             onClick={() => navigate('/scoreboard')}
             variant="outline"
@@ -24,6 +42,59 @@ const Index = () => {
             <Trophy className="w-3 h-3 mr-1" />
             SCOREBOARD
           </Button>
+
+          <div className="flex items-center gap-2">
+            {!loading && (
+              <>
+                {isAdmin ? (
+                  <>
+                    {/* Admin Controls */}
+                    <Button
+                      onClick={handleToggleEvent}
+                      variant="outline"
+                      size="sm"
+                      className={`font-display text-xs ${
+                        isEventActive 
+                          ? "border-green-500/50 text-green-500 hover:bg-green-500/10" 
+                          : "border-orange-500/50 text-orange-500 hover:bg-orange-500/10"
+                      }`}
+                    >
+                      {isEventActive ? (
+                        <>
+                          <Eye className="w-3 h-3 mr-1" />
+                          PUBLIC
+                        </>
+                      ) : (
+                        <>
+                          <EyeOff className="w-3 h-3 mr-1" />
+                          HIDDEN
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      onClick={handleSignOut}
+                      variant="outline"
+                      size="sm"
+                      className="border-muted-foreground/50 text-muted-foreground hover:bg-muted/50 font-display text-xs"
+                    >
+                      <LogOut className="w-3 h-3 mr-1" />
+                      SIGN OUT
+                    </Button>
+                  </>
+                ) : !user ? (
+                  <Button
+                    onClick={() => navigate('/auth')}
+                    variant="outline"
+                    size="sm"
+                    className="border-neon-cyan/50 text-neon-cyan hover:bg-neon-cyan/10 font-display text-xs"
+                  >
+                    <Shield className="w-3 h-3 mr-1" />
+                    ADMIN LOGIN
+                  </Button>
+                ) : null}
+              </>
+            )}
+          </div>
         </nav>
 
         {/* Hero Section */}
