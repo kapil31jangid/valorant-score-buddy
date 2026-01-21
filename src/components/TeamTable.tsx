@@ -30,7 +30,7 @@ interface TeamTableProps {
 const getRankStyle = (rank: number) => {
   switch (rank) {
     case 1:
-      return "text-rank-gold text-glow-red font-bold";
+      return "text-rank-gold text-glow-red font-bold animate-flicker";
     case 2:
       return "text-rank-silver font-semibold";
     case 3:
@@ -55,7 +55,7 @@ export function TeamTable({ teams, onEdit, onDelete, isAdmin = false }: TeamTabl
   });
 
   return (
-    <div className="w-full overflow-hidden rounded-sm border border-border bg-card/50 backdrop-blur-sm border-glow-red">
+    <div className="w-full overflow-hidden rounded-sm border border-border bg-card/50 backdrop-blur-sm border-glow-red animate-scale-in relative scanlines">
       <Table>
         <TableHeader>
           <TableRow className="border-b border-border hover:bg-transparent">
@@ -106,11 +106,11 @@ export function TeamTable({ teams, onEdit, onDelete, isAdmin = false }: TeamTabl
                 <TableRow
                   key={team.id}
                   className={cn(
-                    "border-b border-border/50 transition-all duration-300 animate-slide-up",
-                    rank === 1 && "bg-primary/5",
-                    "hover:bg-secondary/50"
+                    "border-b border-border/50 transition-all duration-300 opacity-0 animate-fade-in-up group",
+                    rank === 1 && "bg-primary/5 hover-glow-red",
+                    rank !== 1 && "hover:bg-secondary/50"
                   )}
-                  style={{ animationDelay: `${index * 50}ms` }}
+                  style={{ animationDelay: `${index * 80}ms`, animationFillMode: 'forwards' }}
                 >
                   <TableCell className="text-center">
                     <span className={cn("font-display text-xl", getRankStyle(rank))}>
@@ -120,7 +120,7 @@ export function TeamTable({ teams, onEdit, onDelete, isAdmin = false }: TeamTabl
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-sm bg-secondary flex items-center justify-center clip-angle-sm overflow-hidden">
+                      <div className="w-10 h-10 rounded-sm bg-secondary flex items-center justify-center clip-angle-sm overflow-hidden transition-transform duration-300 group-hover:scale-110">
                         {team.logo_url ? (
                           <img
                             src={team.logo_url}
@@ -134,10 +134,10 @@ export function TeamTable({ teams, onEdit, onDelete, isAdmin = false }: TeamTabl
                         )}
                       </div>
                       <div>
-                        <p className="font-display text-lg text-foreground tracking-wide">
+                        <p className="font-display text-lg text-foreground tracking-wide transition-all duration-300 group-hover:text-primary group-hover:translate-x-1">
                           {team.name}
                         </p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-xs text-muted-foreground transition-colors duration-300 group-hover:text-muted-foreground/80">
                           Win Rate: {winRate}%
                         </p>
                       </div>
