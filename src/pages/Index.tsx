@@ -2,33 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Trophy, Swords, Target } from "lucide-react";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
-
-const agents = [
-  {
-    name: "Jett",
-    role: "Duelist",
-    image: "https://images.contentstack.io/v3/assets/bltb6530b271fddd0b1/blt62014548e4b5da4b/5eb7cdc17bedc8627f13e4a5/V_AGENTS_587x900_Jett.png",
-    color: "from-cyan-400 to-blue-500",
-  },
-  {
-    name: "Phoenix",
-    role: "Duelist",
-    image: "https://images.contentstack.io/v3/assets/bltb6530b271fddd0b1/bltf0200e1821b5b39f/5eb7cdc1b3eb2e6288a66060/V_AGENTS_587x900_phx.png",
-    color: "from-orange-400 to-red-500",
-  },
-  {
-    name: "Sage",
-    role: "Sentinel",
-    image: "https://images.contentstack.io/v3/assets/bltb6530b271fddd0b1/blt7d61555dce4a8493/5eb7cdc1dcbe4e2035b5236a/V_AGENTS_587x900_sage.png",
-    color: "from-teal-400 to-emerald-500",
-  },
-  {
-    name: "Reyna",
-    role: "Duelist",
-    image: "https://images.contentstack.io/v3/assets/bltb6530b271fddd0b1/blt0eb92b497e1c8fff/5edb2e01ea19c13a5b0ec9e3/V_AGENTS_587x900_Reyna.png",
-    color: "from-purple-400 to-pink-500",
-  },
-];
+import valorantAgents from "@/assets/valorant-agents-lineup.jpg";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -74,45 +48,13 @@ const Index = () => {
         {/* Agents Section */}
         <main className="flex-1 px-4 py-12">
           <div className="max-w-7xl mx-auto">
-            
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
-              {agents.map((agent, index) => (
-                <div 
-                  key={agent.name}
-                  className={`group relative stagger-${index + 1}`}
-                >
-                  {/* Card */}
-                  <div className="relative bg-card/50 backdrop-blur-sm border border-border/50 rounded-lg overflow-hidden hover:border-valorant-red/50 transition-all duration-500 hover:scale-105 hover-glow-red">
-                    {/* Gradient overlay */}
-                    <div className={`absolute inset-0 bg-gradient-to-t ${agent.color} opacity-0 group-hover:opacity-20 transition-opacity duration-500`} />
-                    
-                    {/* Agent image */}
-                    <div className="relative h-48 md:h-64 overflow-hidden">
-                      <img 
-                        src={agent.image} 
-                        alt={agent.name}
-                        className="w-full h-full object-cover object-top transform group-hover:scale-110 transition-transform duration-700"
-                      />
-                      {/* Scanline effect */}
-                      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-card/90" />
-                    </div>
-                    
-                    {/* Agent info */}
-                    <div className="relative p-4 text-center">
-                      <h3 className="font-display font-bold text-lg text-foreground group-hover:text-valorant-red transition-colors">
-                        {agent.name}
-                      </h3>
-                      <p className="text-sm text-muted-foreground font-body uppercase tracking-wider">
-                        {agent.role}
-                      </p>
-                    </div>
-                    
-                    {/* Corner accent */}
-                    <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-valorant-red/50 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-valorant-red/50 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </div>
-                </div>
-              ))}
+            <div className="relative rounded-lg overflow-hidden border border-border/50 hover:border-valorant-red/50 transition-all duration-500 hover-glow-red">
+              <img 
+                src={valorantAgents} 
+                alt="Valorant Agents Lineup"
+                className="w-full h-auto object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
             </div>
           </div>
         </main>
