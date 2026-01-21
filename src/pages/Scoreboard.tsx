@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Trophy, Users, Gamepad2, Shield, LogOut } from "lucide-react";
+import { Plus, Trophy, Users, Gamepad2, Shield, LogOut, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TeamTable } from "@/components/TeamTable";
 import { TeamFormDialog } from "@/components/TeamFormDialog";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { MatchHistory } from "@/components/MatchHistory";
+import { ComingSoon } from "@/components/ComingSoon";
 import { useTeams, Team } from "@/hooks/useTeams";
 import { useMatches } from "@/hooks/useMatches";
 import { useAuth } from "@/hooks/useAuth";
+import { useEventSettings } from "@/hooks/useEventSettings";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,6 +27,7 @@ const Index = () => {
   const { teams, loading, addTeam, updateTeam, deleteTeam } = useTeams();
   const { matches, loading: matchesLoading, addMatch, deleteMatch } = useMatches();
   const { user, isAdmin, signOut, loading: authLoading } = useAuth();
+  const { isEventActive, loading: eventLoading, toggleEventStatus } = useEventSettings();
   const { toast } = useToast();
   const [formOpen, setFormOpen] = useState(false);
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
@@ -61,6 +64,29 @@ const Index = () => {
       });
     }
   };
+
+  const handleToggleEvent = async () => {
+    const { error } = await toggleEventStatus();
+    if (error) {
+      toast({
+        title: "Error updating event status",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: isEventActive ? "Scoreboard hidden" : "Scoreboard visible",
+        description: isEventActive 
+          ? "The scoreboard is now hidden from viewers." 
+          : "The scoreboard is now visible to everyone.",
+      });
+    }
+  };
+
+  // Show coming soon for non-admins when event is not active
+  if (!eventLoading && !isEventActive && !isAdmin) {
+    return <ComingSoon />;
+  }
 
   const handleFormSubmit = async (data: any) => {
     if (data.id) {
@@ -105,6 +131,30 @@ const Index = () => {
             <>
               {user && isAdmin ? (
                 <div className="flex items-center gap-2">
+                  {/* Event visibility toggle */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleToggleEvent}
+                    className={`text-xs font-display uppercase tracking-wider ${
+                      isEventActive 
+                        ? "border-green-500/50 text-green-500 hover:bg-green-500/10" 
+                        : "border-orange-500/50 text-orange-500 hover:bg-orange-500/10"
+                    }`}
+                  >
+                    {isEventActive ? (
+                      <>
+                        <Eye className="w-4 h-4 mr-1" />
+                        Public
+                      </>
+                    ) : (
+                      <>
+                        <EyeOff className="w-4 h-4 mr-1" />
+                        Hidden
+                      </>
+                    )}
+                  </Button>
+                  
                   <div className="flex items-center gap-2 bg-primary/20 border border-primary/30 rounded-sm px-3 py-1.5">
                     <Shield className="w-4 h-4 text-primary" />
                     <span className="text-xs font-display uppercase tracking-wider text-primary">Admin</span>
