@@ -4,6 +4,7 @@ import { Plus, Trophy, Users, Gamepad2, Shield, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TeamTable } from "@/components/TeamTable";
 import { TeamFormDialog } from "@/components/TeamFormDialog";
+import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { useTeams } from "@/hooks/useTeams";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -95,9 +96,12 @@ const Index = () => {
     : "—";
 
   return (
-    <div className="min-h-screen bg-background bg-grid">
+    <div className="min-h-screen bg-background relative">
+      {/* Animated Background */}
+      <AnimatedBackground />
+      
       {/* Hero Section */}
-      <div className="relative overflow-hidden border-b border-border">
+      <div className="relative overflow-hidden border-b border-border z-10">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent pointer-events-none" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-primary/20 blur-[120px] rounded-full pointer-events-none" />
         

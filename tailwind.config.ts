@@ -160,6 +160,41 @@ export default {
           "0%, 100%": { backgroundPosition: "0% 50%" },
           "50%": { backgroundPosition: "100% 50%" },
         },
+        "float-slow": {
+          "0%, 100%": { transform: "translate(0, 0) scale(1)" },
+          "33%": { transform: "translate(30px, -30px) scale(1.05)" },
+          "66%": { transform: "translate(-20px, 20px) scale(0.95)" },
+        },
+        "float-medium": {
+          "0%, 100%": { transform: "translate(0, 0)" },
+          "50%": { transform: "translate(-40px, 30px)" },
+        },
+        "pulse-slow": {
+          "0%, 100%": { opacity: "0.3", transform: "translate(-50%, -50%) scale(1)" },
+          "50%": { opacity: "0.5", transform: "translate(-50%, -50%) scale(1.1)" },
+        },
+        "float-particle": {
+          "0%": { transform: "translateY(0) translateX(0)", opacity: "0" },
+          "10%": { opacity: "1" },
+          "90%": { opacity: "1" },
+          "100%": { transform: "translateY(-100vh) translateX(50px)", opacity: "0" },
+        },
+        "geometric-float": {
+          "0%, 100%": { transform: "translateY(0) rotate(0deg)", opacity: "0.3" },
+          "50%": { transform: "translateY(-20px) rotate(5deg)", opacity: "0.6" },
+        },
+        "spin-slow": {
+          "0%": { transform: "rotate(45deg)" },
+          "100%": { transform: "rotate(405deg)" },
+        },
+        "line-extend": {
+          "0%, 100%": { scaleX: "0.5", opacity: "0.2" },
+          "50%": { scaleX: "1", opacity: "0.5" },
+        },
+        "scan": {
+          "0%": { transform: "translateY(-100%)" },
+          "100%": { transform: "translateY(100vh)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -178,6 +213,14 @@ export default {
         "scale-in": "scale-in 0.3s ease-out forwards",
         "shimmer": "shimmer 2s linear infinite",
         "border-flow": "border-flow 3s ease infinite",
+        "float-slow": "float-slow 20s ease-in-out infinite",
+        "float-medium": "float-medium 15s ease-in-out infinite",
+        "pulse-slow": "pulse-slow 8s ease-in-out infinite",
+        "float-particle": "float-particle 20s linear infinite",
+        "geometric-float": "geometric-float 6s ease-in-out infinite",
+        "spin-slow": "spin-slow 30s linear infinite",
+        "line-extend": "line-extend 4s ease-in-out infinite",
+        "scan": "scan 6s linear infinite",
       },
     },
   },
