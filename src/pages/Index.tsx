@@ -5,7 +5,9 @@ import { Button } from "@/components/ui/button";
 import { TeamTable } from "@/components/TeamTable";
 import { TeamFormDialog } from "@/components/TeamFormDialog";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
-import { useTeams } from "@/hooks/useTeams";
+import { MatchHistory } from "@/components/MatchHistory";
+import { useTeams, Team } from "@/hooks/useTeams";
+import { useMatches } from "@/hooks/useMatches";
 import { useAuth } from "@/hooks/useAuth";
 import {
   AlertDialog,
@@ -19,17 +21,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 
-interface Team {
-  id: string;
-  name: string;
-  logo_url: string | null;
-  wins: number;
-  losses: number;
-  points: number;
-}
-
 const Index = () => {
   const { teams, loading, addTeam, updateTeam, deleteTeam } = useTeams();
+  const { matches, loading: matchesLoading, addMatch, deleteMatch } = useMatches();
   const { user, isAdmin, signOut, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const [formOpen, setFormOpen] = useState(false);
@@ -240,12 +234,23 @@ const Index = () => {
             </div>
           </div>
         ) : (
-          <TeamTable
-            teams={teams}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            isAdmin={isAdmin}
-          />
+          <div className="space-y-8">
+            <TeamTable
+              teams={teams}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              isAdmin={isAdmin}
+            />
+            
+            <MatchHistory
+              matches={matches}
+              teams={teams}
+              loading={matchesLoading}
+              isAdmin={isAdmin}
+              onAddMatch={addMatch}
+              onDeleteMatch={deleteMatch}
+            />
+          </div>
         )}
       </div>
 

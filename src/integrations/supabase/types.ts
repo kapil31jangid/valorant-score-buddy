@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      matches: {
+        Row: {
+          created_at: string
+          id: string
+          map_name: string | null
+          played_at: string
+          team1_id: string
+          team1_score: number
+          team2_id: string
+          team2_score: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          map_name?: string | null
+          played_at?: string
+          team1_id: string
+          team1_score?: number
+          team2_id: string
+          team2_score?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          map_name?: string | null
+          played_at?: string
+          team1_id?: string
+          team1_score?: number
+          team2_id?: string
+          team2_score?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matches_team1_id_fkey"
+            columns: ["team1_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_team2_id_fkey"
+            columns: ["team2_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       teams: {
         Row: {
           created_at: string
