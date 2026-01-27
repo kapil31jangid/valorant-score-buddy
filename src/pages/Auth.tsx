@@ -16,8 +16,7 @@ const authSchema = z.object({
 const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user, signIn, signUp, resetPassword } = useAuth();
-  const [isLogin, setIsLogin] = useState(true);
+  const { user, signIn, resetPassword } = useAuth();
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -88,52 +87,27 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      if (isLogin) {
-        const { error } = await signIn(email, password);
-        if (error) {
-          if (error.message.includes("Invalid login credentials")) {
-            toast({
-              title: "Login failed",
-              description: "Invalid email or password. Please try again.",
-              variant: "destructive",
-            });
-          } else {
-            toast({
-              title: "Login failed",
-              description: error.message,
-              variant: "destructive",
-            });
-          }
+      const { error } = await signIn(email, password);
+      if (error) {
+        if (error.message.includes("Invalid login credentials")) {
+          toast({
+            title: "Login failed",
+            description: "Invalid email or password. Please try again.",
+            variant: "destructive",
+          });
         } else {
           toast({
-            title: "Welcome back!",
-            description: "You are now logged in as admin.",
+            title: "Login failed",
+            description: error.message,
+            variant: "destructive",
           });
-          navigate("/");
         }
       } else {
-        const { error } = await signUp(email, password);
-        if (error) {
-          if (error.message.includes("User already registered")) {
-            toast({
-              title: "Sign up failed",
-              description: "This email is already registered. Please log in instead.",
-              variant: "destructive",
-            });
-          } else {
-            toast({
-              title: "Sign up failed",
-              description: error.message,
-              variant: "destructive",
-            });
-          }
-        } else {
-          toast({
-            title: "Admin account created!",
-            description: "You can now edit tournament scores.",
-          });
-          navigate("/");
-        }
+        toast({
+          title: "Welcome back!",
+          description: "You are now logged in as admin.",
+        });
+        navigate("/");
       }
     } finally {
       setLoading(false);
@@ -160,9 +134,7 @@ const Auth = () => {
             <p className="text-muted-foreground text-sm">
               {isForgotPassword
                 ? "Enter your email to receive a reset link"
-                : isLogin
-                  ? "Sign in to manage tournament scores"
-                  : "Create an admin account to edit scores"}
+                : "Sign in to manage tournament scores"}
             </p>
           </div>
 
@@ -260,17 +232,15 @@ const Auth = () => {
               )}
             </div>
 
-            {isLogin && (
-              <div className="text-right">
-                <button
-                  type="button"
-                  onClick={() => setIsForgotPassword(true)}
-                  className="text-muted-foreground hover:text-primary text-xs"
-                >
-                  Forgot password?
-                </button>
-              </div>
-            )}
+            <div className="text-right">
+              <button
+                type="button"
+                onClick={() => setIsForgotPassword(true)}
+                className="text-muted-foreground hover:text-primary text-xs"
+              >
+                Forgot password?
+              </button>
+            </div>
 
             <Button
               type="submit"
@@ -280,30 +250,15 @@ const Auth = () => {
               {loading ? (
                 <div className="flex items-center gap-2">
                   <Gamepad2 className="w-4 h-4 animate-pulse" />
-                  {isLogin ? "Signing in..." : "Creating account..."}
+                  Signing in...
                 </div>
               ) : (
-                isLogin ? "Sign In" : "Create Admin Account"
+                "Sign In"
               )}
             </Button>
           </form>
           )}
 
-          {/* Toggle */}
-          {!isForgotPassword && (
-            <div className="mt-6 text-center">
-              <p className="text-muted-foreground text-sm">
-                {isLogin ? "Don't have an account?" : "Already have an account?"}
-                <button
-                  type="button"
-                  onClick={() => setIsLogin(!isLogin)}
-                  className="ml-2 text-primary hover:text-primary/80 font-display uppercase tracking-wider text-xs"
-                >
-                  {isLogin ? "Sign Up" : "Sign In"}
-                </button>
-              </p>
-            </div>
-          )}
 
           {/* Back link */}
           <div className="mt-4 text-center">
