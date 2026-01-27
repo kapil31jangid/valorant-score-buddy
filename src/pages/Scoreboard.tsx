@@ -111,13 +111,7 @@ const Index = () => {
     setEditingTeam(null);
   };
 
-  const handleChangeGroup = async (teamId: string, newGroup: string) => {
-    await updateTeam(teamId, { group_name: newGroup });
-    toast({
-      title: "Team moved",
-      description: `Team has been moved to Group ${newGroup}.`,
-    });
-  };
+  // Group/bucket assignment is now automatic - no manual moves needed
 
   const totalTeams = teams.length;
   const totalMatches = teams.reduce((acc, t) => acc + t.wins + t.losses, 0) / 2;
@@ -299,7 +293,7 @@ const Index = () => {
               teams={teams}
               onEdit={handleEdit}
               onDelete={handleDelete}
-              onChangeGroup={handleChangeGroup}
+              onChangeGroup={() => {}} // Auto-assignment handles this
               isAdmin={isAdmin}
             />
             
