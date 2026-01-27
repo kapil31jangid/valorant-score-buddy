@@ -1,9 +1,7 @@
-import { useState } from "react";
-import { ChevronDown, ChevronUp, Trophy, Medal, Award, Star, Shield } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { useMemo } from "react";
 import { cn } from "@/lib/utils";
-import { TeamTable } from "./TeamTable";
+import { Edit2, Trash2, Trophy, TrendingUp, TrendingDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface Team {
   id: string;
@@ -21,118 +19,40 @@ interface TieredLeaderboardProps {
   isAdmin?: boolean;
 }
 
-interface Bucket {
-  id: string;
-  name: string;
-  icon: React.ReactNode;
-  color: string;
-  bgGradient: string;
-  borderColor: string;
-  minPoints: number;
-  maxPoints: number;
-}
+function shuffleArray<T>(array: T[], seed: number): T[] {
+  const shuffled = [...array];
+  let currentIndex = shuffled.length;
+  
+  // Use a seeded random for consistent shuffling per session
+  const seededRandom = () => {
+    seed = (seed * 9301 + 49297) % 233280;
+    return seed / 233280;
+  };
 
-const BUCKETS: Bucket[] = [
-  {
-    id: "champion",
-    name: "Champion",
-    icon: <Trophy className="w-5 h-5" />,
-    color: "text-rank-gold",
-    bgGradient: "from-yellow-500/20 to-amber-600/10",
-    borderColor: "border-yellow-500/50",
-    minPoints: 15,
-    maxPoints: Infinity,
-  },
-  {
-    id: "diamond",
-    name: "Diamond",
-    icon: <Star className="w-5 h-5" />,
-    color: "text-cyan-400",
-    bgGradient: "from-cyan-500/20 to-blue-500/10",
-    borderColor: "border-cyan-500/50",
-    minPoints: 10,
-    maxPoints: 14,
-  },
-  {
-    id: "platinum",
-    name: "Platinum",
-    icon: <Medal className="w-5 h-5" />,
-    color: "text-slate-300",
-    bgGradient: "from-slate-400/20 to-zinc-500/10",
-    borderColor: "border-slate-400/50",
-    minPoints: 6,
-    maxPoints: 9,
-  },
-  {
-    id: "gold",
-    name: "Gold",
-    icon: <Award className="w-5 h-5" />,
-    color: "text-amber-500",
-    bgGradient: "from-amber-500/20 to-orange-600/10",
-    borderColor: "border-amber-500/50",
-    minPoints: 3,
-    maxPoints: 5,
-  },
-  {
-    id: "silver",
-    name: "Silver",
-    icon: <Shield className="w-5 h-5" />,
-    color: "text-gray-400",
-    bgGradient: "from-gray-400/20 to-gray-600/10",
-    borderColor: "border-gray-500/50",
-    minPoints: 0,
-    maxPoints: 2,
-  },
-];
-
-function getBucketForTeam(team: Team): Bucket {
-  for (const bucket of BUCKETS) {
-    if (team.points >= bucket.minPoints && team.points <= bucket.maxPoints) {
-      return bucket;
-    }
+  while (currentIndex !== 0) {
+    const randomIndex = Math.floor(seededRandom() * currentIndex);
+    currentIndex--;
+    [shuffled[currentIndex], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[currentIndex]];
   }
-  return BUCKETS[BUCKETS.length - 1]; // Default to lowest bucket
-}
 
-function groupTeamsByBucket(teams: Team[]): Map<string, Team[]> {
-  const grouped = new Map<string, Team[]>();
-  
-  // Initialize all buckets with empty arrays
-  BUCKETS.forEach(bucket => grouped.set(bucket.id, []));
-  
-  // Sort teams by points first
-  const sortedTeams = [...teams].sort((a, b) => {
-    if (b.points !== a.points) return b.points - a.points;
-    return b.wins - a.wins;
-  });
-  
-  // Assign teams to buckets
-  sortedTeams.forEach(team => {
-    const bucket = getBucketForTeam(team);
-    const bucketTeams = grouped.get(bucket.id) || [];
-    bucketTeams.push(team);
-    grouped.set(bucket.id, bucketTeams);
-  });
-  
-  return grouped;
+  return shuffled;
 }
 
 export function TieredLeaderboard({ teams, onEdit, onDelete, isAdmin = false }: TieredLeaderboardProps) {
-  const [openBuckets, setOpenBuckets] = useState<Set<string>>(new Set(BUCKETS.map(b => b.id)));
-  
-  const groupedTeams = groupTeamsByBucket(teams);
-  
-  const toggleBucket = (bucketId: string) => {
-    setOpenBuckets(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(bucketId)) {
-        newSet.delete(bucketId);
-      } else {
-        newSet.add(bucketId);
-      }
-      return newSet;
-    });
-  };
+  // Split teams randomly into two groups
+  const { groupA, groupB } = useMemo(() => {
+    if (teams.length === 0) return { groupA: [], groupB: [] };
+    
+    // Use a fixed seed based on team IDs for consistent grouping
+    const seed = teams.reduce((acc, t) => acc + t.id.charCodeAt(0), 0);
+    const shuffled = shuffleArray(teams, seed);
+    
+    const midpoint = Math.ceil(shuffled.length / 2);
+    return {
+      groupA: shuffled.slice(0, midpoint),
+      groupB: shuffled.slice(midpoint),
+    };
+  }, [teams]);
 
   if (teams.length === 0) {
     return (
@@ -152,173 +72,186 @@ export function TieredLeaderboard({ teams, onEdit, onDelete, isAdmin = false }: 
   }
 
   return (
-    <div className="space-y-4 animate-fade-in">
-      {BUCKETS.map((bucket, bucketIndex) => {
-        const bucketTeams = groupedTeams.get(bucket.id) || [];
-        const isOpen = openBuckets.has(bucket.id);
-        
-        return (
-          <Collapsible
-            key={bucket.id}
-            open={isOpen}
-            onOpenChange={() => toggleBucket(bucket.id)}
-            className="animate-fade-in-up"
-            style={{ animationDelay: `${bucketIndex * 100}ms` }}
-          >
-            <div
-              className={cn(
-                "rounded-sm border backdrop-blur-sm transition-all duration-300",
-                bucket.borderColor,
-                `bg-gradient-to-r ${bucket.bgGradient}`,
-                isOpen && "shadow-lg"
-              )}
-            >
-              <CollapsibleTrigger className="w-full">
-                <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-white/5 transition-colors rounded-t-sm">
-                  <div className="flex items-center gap-3">
-                    <div className={cn("p-2 rounded-sm bg-black/30", bucket.color)}>
-                      {bucket.icon}
-                    </div>
-                    <div className="text-left">
-                      <h3 className={cn("font-display text-xl tracking-wide", bucket.color)}>
-                        {bucket.name}
-                      </h3>
-                      <p className="text-xs text-muted-foreground">
-                        {bucket.minPoints === 0 && bucket.maxPoints === 2 
-                          ? "0-2 points"
-                          : bucket.maxPoints === Infinity 
-                            ? `${bucket.minPoints}+ points`
-                            : `${bucket.minPoints}-${bucket.maxPoints} points`
-                        }
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Badge 
-                      variant="outline" 
-                      className={cn("font-display", bucket.color, bucket.borderColor)}
-                    >
-                      {bucketTeams.length} {bucketTeams.length === 1 ? "team" : "teams"}
-                    </Badge>
-                    {isOpen ? (
-                      <ChevronUp className={cn("w-5 h-5 transition-transform", bucket.color)} />
-                    ) : (
-                      <ChevronDown className={cn("w-5 h-5 transition-transform", bucket.color)} />
-                    )}
-                  </div>
-                </div>
-              </CollapsibleTrigger>
-              
-              <CollapsibleContent>
-                <div className="p-4 pt-0">
-                  {bucketTeams.length > 0 ? (
-                    <BucketTeamList 
-                      teams={bucketTeams} 
-                      bucket={bucket}
-                      onEdit={onEdit}
-                      onDelete={onDelete}
-                      isAdmin={isAdmin}
-                    />
-                  ) : (
-                    <div className="text-center py-6 text-muted-foreground/60 text-sm">
-                      No teams in this tier yet
-                    </div>
-                  )}
-                </div>
-              </CollapsibleContent>
-            </div>
-          </Collapsible>
-        );
-      })}
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in">
+      <GroupTable 
+        title="Group A" 
+        teams={groupA} 
+        onEdit={onEdit} 
+        onDelete={onDelete} 
+        isAdmin={isAdmin}
+        accentColor="cyan"
+      />
+      <GroupTable 
+        title="Group B" 
+        teams={groupB} 
+        onEdit={onEdit} 
+        onDelete={onDelete} 
+        isAdmin={isAdmin}
+        accentColor="primary"
+      />
     </div>
   );
 }
 
-interface BucketTeamListProps {
+interface GroupTableProps {
+  title: string;
   teams: Team[];
-  bucket: Bucket;
   onEdit: (team: Team) => void;
   onDelete: (id: string) => void;
   isAdmin?: boolean;
+  accentColor: "cyan" | "primary";
 }
 
-function BucketTeamList({ teams, bucket, onEdit, onDelete, isAdmin = false }: BucketTeamListProps) {
+function GroupTable({ title, teams, onEdit, onDelete, isAdmin = false, accentColor }: GroupTableProps) {
+  // Sort teams within group by points
+  const sortedTeams = [...teams].sort((a, b) => {
+    if (b.points !== a.points) return b.points - a.points;
+    return b.wins - a.wins;
+  });
+
+  const colorClasses = {
+    cyan: {
+      border: "border-neon-cyan/50",
+      headerBg: "from-cyan-500/20 to-cyan-600/5",
+      title: "text-neon-cyan",
+      glow: "shadow-cyan-500/20",
+    },
+    primary: {
+      border: "border-primary/50",
+      headerBg: "from-primary/20 to-primary/5",
+      title: "text-primary",
+      glow: "shadow-primary/20",
+    },
+  };
+
+  const colors = colorClasses[accentColor];
+
   return (
-    <div className="space-y-2">
-      {teams.map((team, index) => {
-        const winRate = team.wins + team.losses > 0 
-          ? ((team.wins / (team.wins + team.losses)) * 100).toFixed(0) 
-          : "0";
-        
-        return (
-          <div
-            key={team.id}
-            className={cn(
-              "flex items-center justify-between p-3 rounded-sm bg-black/20 border border-border/30",
-              "transition-all duration-300 hover:bg-black/30 hover:border-border/50 group",
-              "animate-fade-in-up"
-            )}
-            style={{ animationDelay: `${index * 50}ms` }}
-          >
-            <div className="flex items-center gap-3">
-              <span className={cn("font-display text-lg w-8 text-center", bucket.color)}>
-                #{index + 1}
-              </span>
-              <div className="w-10 h-10 rounded-sm bg-secondary flex items-center justify-center overflow-hidden transition-transform duration-300 group-hover:scale-110">
-                {team.logo_url ? (
-                  <img
-                    src={team.logo_url}
-                    alt={team.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span className="text-primary font-display text-lg">
-                    {team.name.charAt(0).toUpperCase()}
-                  </span>
+    <div className={cn(
+      "rounded-sm border backdrop-blur-sm overflow-hidden",
+      colors.border,
+      "bg-card/50"
+    )}>
+      {/* Group Header */}
+      <div className={cn(
+        "px-4 py-3 bg-gradient-to-r border-b",
+        colors.headerBg,
+        colors.border
+      )}>
+        <h3 className={cn("font-display text-xl tracking-wider", colors.title)}>
+          {title}
+        </h3>
+        <p className="text-xs text-muted-foreground">
+          {teams.length} {teams.length === 1 ? "team" : "teams"}
+        </p>
+      </div>
+
+      {/* Teams List */}
+      <div className="divide-y divide-border/30">
+        {sortedTeams.map((team, index) => {
+          const rank = index + 1;
+          const winRate = team.wins + team.losses > 0 
+            ? ((team.wins / (team.wins + team.losses)) * 100).toFixed(0) 
+            : "0";
+
+          return (
+            <div
+              key={team.id}
+              className={cn(
+                "flex items-center justify-between p-3 transition-all duration-300 group",
+                "hover:bg-white/5",
+                "animate-fade-in-up"
+              )}
+              style={{ animationDelay: `${index * 50}ms` }}
+            >
+              <div className="flex items-center gap-3">
+                {/* Rank */}
+                <span className={cn(
+                  "font-display text-lg w-8 text-center",
+                  rank === 1 ? "text-rank-gold" : "text-muted-foreground"
+                )}>
+                  {rank === 1 && <Trophy className="w-4 h-4 inline-block mr-0.5 text-rank-gold" />}
+                  #{rank}
+                </span>
+
+                {/* Logo */}
+                <div className="w-10 h-10 rounded-sm bg-secondary flex items-center justify-center overflow-hidden transition-transform duration-300 group-hover:scale-110">
+                  {team.logo_url ? (
+                    <img
+                      src={team.logo_url}
+                      alt={team.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-primary font-display text-lg">
+                      {team.name.charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                </div>
+
+                {/* Team Info */}
+                <div>
+                  <p className="font-display text-base text-foreground tracking-wide transition-all duration-300 group-hover:text-primary">
+                    {team.name}
+                  </p>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-0.5">
+                      <TrendingUp className="w-3 h-3 text-neon-cyan" />
+                      {team.wins}W
+                    </span>
+                    <span className="flex items-center gap-0.5">
+                      <TrendingDown className="w-3 h-3 text-destructive" />
+                      {team.losses}L
+                    </span>
+                    <span>• {winRate}%</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                {/* Points */}
+                <div className="text-right">
+                  <p className={cn(
+                    "font-display text-xl",
+                    rank === 1 ? "text-rank-gold" : "text-foreground"
+                  )}>
+                    {team.points}
+                  </p>
+                  <p className="text-xs text-muted-foreground">pts</p>
+                </div>
+
+                {/* Admin Actions */}
+                {isAdmin && (
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onEdit(team)}
+                      className="h-8 w-8 hover:bg-neon-cyan/20 hover:text-neon-cyan transition-colors"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onDelete(team.id)}
+                      className="h-8 w-8 hover:bg-destructive/20 hover:text-destructive transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
                 )}
               </div>
-              <div>
-                <p className="font-display text-lg text-foreground tracking-wide transition-all duration-300 group-hover:text-primary">
-                  {team.name}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {team.wins}W - {team.losses}L • {winRate}% WR
-                </p>
-              </div>
             </div>
-            
-            <div className="flex items-center gap-4">
-              <div className="text-right">
-                <p className={cn("font-display text-2xl", bucket.color)}>
-                  {team.points}
-                </p>
-                <p className="text-xs text-muted-foreground">points</p>
-              </div>
-              
-              {isAdmin && (
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => onEdit(team)}
-                    className="p-2 hover:bg-neon-cyan/20 hover:text-neon-cyan rounded-sm transition-colors"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                  </button>
-                  <button
-                    onClick={() => onDelete(team.id)}
-                    className="p-2 hover:bg-destructive/20 hover:text-destructive rounded-sm transition-colors"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
-                </div>
-              )}
-            </div>
+          );
+        })}
+
+        {teams.length === 0 && (
+          <div className="p-6 text-center text-muted-foreground/60 text-sm">
+            No teams in this group
           </div>
-        );
-      })}
+        )}
+      </div>
     </div>
   );
 }
