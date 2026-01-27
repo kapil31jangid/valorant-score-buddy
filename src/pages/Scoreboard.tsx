@@ -197,9 +197,9 @@ const Index = () => {
               </div>
               <h1 
                 className="font-display text-4xl md:text-5xl font-bold tracking-wider text-glow-red glitch-text" 
-                data-text="VALORANT"
+                data-text="CYBER CLUTCH 4.0"
               >
-                VALORANT
+                CYBER CLUTCH 4.0
               </h1>
             </div>
             <p className="font-display text-xl md:text-2xl text-muted-foreground tracking-[0.3em] uppercase animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
