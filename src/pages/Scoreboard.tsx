@@ -323,6 +323,7 @@ const Index = () => {
           if (!open) setEditingTeam(null);
         }}
         team={editingTeam}
+        allTeams={teams}
         onSubmit={handleFormSubmit}
       />
 

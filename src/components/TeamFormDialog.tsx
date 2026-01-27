@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -26,14 +26,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Gamepad2, Save, Plus } from "lucide-react";
+import { getSelectableGroups, getSuggestedGroup } from "@/lib/groupUtils";
 
+// Dynamic schema that accepts any single uppercase letter
 const teamSchema = z.object({
   name: z.string().min(1, "Team name is required").max(50, "Team name too long"),
   logo_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
   wins: z.coerce.number().min(0, "Cannot be negative"),
   losses: z.coerce.number().min(0, "Cannot be negative"),
   points: z.coerce.number().min(0, "Cannot be negative"),
-  group_name: z.enum(["A", "B"]),
+  group_name: z.string().regex(/^[A-Z]$/, "Must be a single letter A-Z"),
 });
 
 type TeamFormData = z.infer<typeof teamSchema>;
@@ -52,6 +54,7 @@ interface TeamFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   team?: Team | null;
+  allTeams?: Team[];
   onSubmit: (data: TeamFormData & { id?: string }) => void;
 }
 
@@ -59,9 +62,21 @@ export function TeamFormDialog({
   open,
   onOpenChange,
   team,
+  allTeams = [],
   onSubmit,
 }: TeamFormDialogProps) {
   const isEditing = !!team;
+
+  // Get available groups based on current teams
+  const availableGroups = useMemo(() => {
+    return getSelectableGroups(allTeams, team?.id);
+  }, [allTeams, team?.id]);
+
+  // Get suggested group for new teams
+  const suggestedGroup = useMemo(() => {
+    if (team) return team.group_name;
+    return getSuggestedGroup(allTeams);
+  }, [allTeams, team]);
 
   const form = useForm<TeamFormData>({
     resolver: zodResolver(teamSchema),
@@ -83,7 +98,7 @@ export function TeamFormDialog({
         wins: team.wins,
         losses: team.losses,
         points: team.points,
-        group_name: (team.group_name as "A" | "B") || "A",
+        group_name: team.group_name || "A",
       });
     } else {
       form.reset({
@@ -92,10 +107,10 @@ export function TeamFormDialog({
         wins: 0,
         losses: 0,
         points: 0,
-        group_name: "A",
+        group_name: suggestedGroup,
       });
     }
-  }, [team, form]);
+  }, [team, form, suggestedGroup]);
 
   const handleSubmit = (data: TeamFormData) => {
     onSubmit({
@@ -174,8 +189,11 @@ export function TeamFormDialog({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="A" className="font-display">Group A</SelectItem>
-                      <SelectItem value="B" className="font-display">Group B</SelectItem>
+                      {availableGroups.map((group) => (
+                        <SelectItem key={group} value={group} className="font-display">
+                          Group {group}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
