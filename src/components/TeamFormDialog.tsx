@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -16,26 +16,18 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Gamepad2, Save, Plus } from "lucide-react";
-import { getSelectableGroups, getSuggestedGroup } from "@/lib/groupUtils";
+import { Gamepad2, Save, Plus, Info } from "lucide-react";
 
-// Dynamic schema that accepts any single uppercase letter
+// Simplified schema - group_name is auto-assigned
 const teamSchema = z.object({
   name: z.string().min(1, "Team name is required").max(50, "Team name too long"),
   logo_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
   wins: z.coerce.number().min(0, "Cannot be negative"),
   losses: z.coerce.number().min(0, "Cannot be negative"),
   points: z.coerce.number().min(0, "Cannot be negative"),
-  group_name: z.string().regex(/^[A-Z]$/, "Must be a single letter A-Z"),
+  group_name: z.string().default("A"), // Auto-assigned, kept for DB compatibility
 });
 
 type TeamFormData = z.infer<typeof teamSchema>;
@@ -67,17 +59,6 @@ export function TeamFormDialog({
 }: TeamFormDialogProps) {
   const isEditing = !!team;
 
-  // Get available groups based on current teams
-  const availableGroups = useMemo(() => {
-    return getSelectableGroups(allTeams, team?.id);
-  }, [allTeams, team?.id]);
-
-  // Get suggested group for new teams
-  const suggestedGroup = useMemo(() => {
-    if (team) return team.group_name;
-    return getSuggestedGroup(allTeams);
-  }, [allTeams, team]);
-
   const form = useForm<TeamFormData>({
     resolver: zodResolver(teamSchema),
     defaultValues: {
@@ -107,10 +88,10 @@ export function TeamFormDialog({
         wins: 0,
         losses: 0,
         points: 0,
-        group_name: suggestedGroup,
+        group_name: "A",
       });
     }
-  }, [team, form, suggestedGroup]);
+  }, [team, form]);
 
   const handleSubmit = (data: TeamFormData) => {
     onSubmit({
@@ -131,6 +112,14 @@ export function TeamFormDialog({
             {isEditing ? "Edit Team" : "Add New Team"}
           </DialogTitle>
         </DialogHeader>
+
+        {/* Auto-assignment info */}
+        <div className="flex items-start gap-2 p-3 rounded-sm bg-muted/30 border border-border text-sm">
+          <Info className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+          <p className="text-muted-foreground font-body">
+            Teams are automatically distributed into balanced buckets based on total team count and points.
+          </p>
+        </div>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
@@ -169,33 +158,6 @@ export function TeamFormDialog({
                       className="bg-secondary border-border focus:border-primary font-body"
                     />
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="group_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="font-display text-xs uppercase tracking-widest text-muted-foreground">
-                    Group
-                  </FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger className="bg-secondary border-border focus:border-primary font-display">
-                        <SelectValue placeholder="Select group" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {availableGroups.map((group) => (
-                        <SelectItem key={group} value={group} className="font-display">
-                          Group {group}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
                   <FormMessage />
                 </FormItem>
               )}

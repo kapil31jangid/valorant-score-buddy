@@ -1,13 +1,8 @@
 import { cn } from "@/lib/utils";
-import { Edit2, Trash2, Trophy, TrendingUp, TrendingDown } from "lucide-react";
+import { Edit2, Trash2, Trophy, TrendingUp, TrendingDown, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { getDisplayGroups, getSelectableGroups } from "@/lib/groupUtils";
+import { Badge } from "@/components/ui/badge";
+import { getBucketDisplay, BucketConfiguration } from "@/lib/groupUtils";
 
 interface Team {
   id: string;
@@ -27,21 +22,21 @@ interface TieredLeaderboardProps {
   isAdmin?: boolean;
 }
 
-// Color palette for different groups
-const GROUP_COLORS: Record<string, { border: string; headerBg: string; title: string; glow: string }> = {
+// Color palette for different buckets
+const BUCKET_COLORS: Record<string, { border: string; headerBg: string; title: string; glow: string }> = {
   A: { border: "border-neon-cyan/50", headerBg: "from-cyan-500/20 to-cyan-600/5", title: "text-neon-cyan", glow: "shadow-cyan-500/20" },
   B: { border: "border-primary/50", headerBg: "from-primary/20 to-primary/5", title: "text-primary", glow: "shadow-primary/20" },
   C: { border: "border-amber-500/50", headerBg: "from-amber-500/20 to-amber-600/5", title: "text-amber-500", glow: "shadow-amber-500/20" },
   D: { border: "border-emerald-500/50", headerBg: "from-emerald-500/20 to-emerald-600/5", title: "text-emerald-500", glow: "shadow-emerald-500/20" },
   E: { border: "border-violet-500/50", headerBg: "from-violet-500/20 to-violet-600/5", title: "text-violet-500", glow: "shadow-violet-500/20" },
   F: { border: "border-rose-500/50", headerBg: "from-rose-500/20 to-rose-600/5", title: "text-rose-500", glow: "shadow-rose-500/20" },
+  G: { border: "border-indigo-500/50", headerBg: "from-indigo-500/20 to-indigo-600/5", title: "text-indigo-500", glow: "shadow-indigo-500/20" },
+  H: { border: "border-pink-500/50", headerBg: "from-pink-500/20 to-pink-600/5", title: "text-pink-500", glow: "shadow-pink-500/20" },
 };
 
 const DEFAULT_COLOR = { border: "border-muted/50", headerBg: "from-muted/20 to-muted/5", title: "text-muted-foreground", glow: "shadow-muted/20" };
 
-export function TieredLeaderboard({ teams, onEdit, onDelete, onChangeGroup, isAdmin = false }: TieredLeaderboardProps) {
-  const displayGroups = getDisplayGroups(teams);
-
+export function TieredLeaderboard({ teams, onEdit, onDelete, isAdmin = false }: TieredLeaderboardProps) {
   if (teams.length === 0) {
     return (
       <div className="w-full overflow-hidden rounded-sm border border-border bg-card/50 backdrop-blur-sm border-glow-red animate-scale-in relative scanlines p-8">
@@ -59,57 +54,103 @@ export function TieredLeaderboard({ teams, onEdit, onDelete, onChangeGroup, isAd
     );
   }
 
-  // Determine grid columns based on number of groups
-  const gridCols = displayGroups.length <= 2 ? "lg:grid-cols-2" : 
-                   displayGroups.length <= 3 ? "lg:grid-cols-3" : 
-                   "lg:grid-cols-2 xl:grid-cols-4";
+  // Calculate optimal bucket configuration and distribute teams
+  const { config, buckets } = getBucketDisplay(teams);
+  const bucketEntries = Array.from(buckets.entries());
+
+  // Determine grid columns based on number of buckets
+  const gridCols = config.buckets <= 2 ? "lg:grid-cols-2" : 
+                   config.buckets <= 3 ? "lg:grid-cols-3" : 
+                   config.buckets <= 4 ? "lg:grid-cols-2 xl:grid-cols-4" :
+                   "lg:grid-cols-3 xl:grid-cols-4";
 
   return (
-    <div className={cn("grid grid-cols-1 gap-6 animate-fade-in", gridCols)}>
-      {displayGroups.map((groupId) => {
-        const groupTeams = teams.filter(t => t.group_name === groupId);
-        const colors = GROUP_COLORS[groupId] || DEFAULT_COLOR;
-        
-        return (
-          <GroupTable
-            key={groupId}
-            title={`Group ${groupId}`}
-            groupId={groupId}
-            teams={groupTeams}
-            allTeams={teams}
-            onEdit={onEdit}
-            onDelete={onDelete}
-            onChangeGroup={onChangeGroup}
-            isAdmin={isAdmin}
-            colors={colors}
-          />
-        );
-      })}
+    <div className="space-y-4 animate-fade-in">
+      {/* Configuration Info Banner */}
+      <ConfigBanner config={config} />
+      
+      {/* Bucket Grid */}
+      <div className={cn("grid grid-cols-1 gap-6", gridCols)}>
+        {bucketEntries.map(([bucketName, bucketTeams]) => {
+          const colors = BUCKET_COLORS[bucketName] || DEFAULT_COLOR;
+          
+          return (
+            <BucketTable
+              key={bucketName}
+              title={`Bucket ${bucketName}`}
+              bucketName={bucketName}
+              teams={bucketTeams}
+              teamsPerBucket={config.teams_per_bucket}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              isAdmin={isAdmin}
+              colors={colors}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 }
 
-interface GroupTableProps {
+interface ConfigBannerProps {
+  config: BucketConfiguration;
+}
+
+function ConfigBanner({ config }: ConfigBannerProps) {
+  const showWarning = config.note?.includes("prime") || config.note?.includes("not possible");
+
+  return (
+    <div className={cn(
+      "flex flex-wrap items-center justify-between gap-4 px-4 py-3 rounded-sm border backdrop-blur-sm",
+      showWarning 
+        ? "border-amber-500/50 bg-amber-500/10" 
+        : "border-border bg-card/30"
+    )}>
+      <div className="flex flex-wrap items-center gap-3">
+        <Badge variant="outline" className="font-display tracking-wider">
+          {config.total_teams} Teams
+        </Badge>
+        <Badge variant="outline" className="font-display tracking-wider">
+          {config.buckets} {config.buckets === 1 ? "Bucket" : "Buckets"}
+        </Badge>
+        <Badge variant="outline" className="font-display tracking-wider">
+          {config.teams_per_bucket} per bucket
+        </Badge>
+        {config.balanced && (
+          <Badge className="bg-emerald-500/20 text-emerald-500 border-emerald-500/50 font-display tracking-wider">
+            ✓ Balanced
+          </Badge>
+        )}
+      </div>
+      
+      {showWarning && (
+        <div className="flex items-center gap-2 text-amber-500 text-sm">
+          <AlertTriangle className="w-4 h-4" />
+          <span className="font-body">{config.note}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+interface BucketTableProps {
   title: string;
-  groupId: string;
+  bucketName: string;
   teams: Team[];
-  allTeams: Team[];
+  teamsPerBucket: number;
   onEdit: (team: Team) => void;
   onDelete: (id: string) => void;
-  onChangeGroup: (teamId: string, newGroup: string) => void;
   isAdmin?: boolean;
   colors: { border: string; headerBg: string; title: string; glow: string };
 }
 
-function GroupTable({ title, groupId, teams, allTeams, onEdit, onDelete, onChangeGroup, isAdmin = false, colors }: GroupTableProps) {
-  // Sort teams within group by points
+function BucketTable({ title, bucketName, teams, teamsPerBucket, onEdit, onDelete, isAdmin = false, colors }: BucketTableProps) {
+  // Sort teams within bucket by points
   const sortedTeams = [...teams].sort((a, b) => {
     if (b.points !== a.points) return b.points - a.points;
     return b.wins - a.wins;
   });
-
-  // Get available groups for moving teams
-  const availableGroups = getSelectableGroups(allTeams).filter(g => g !== groupId);
 
   return (
     <div className={cn(
@@ -117,7 +158,7 @@ function GroupTable({ title, groupId, teams, allTeams, onEdit, onDelete, onChang
       colors.border,
       "bg-card/50"
     )}>
-      {/* Group Header */}
+      {/* Bucket Header */}
       <div className={cn(
         "px-4 py-3 bg-gradient-to-r border-b",
         colors.headerBg,
@@ -127,7 +168,7 @@ function GroupTable({ title, groupId, teams, allTeams, onEdit, onDelete, onChang
           {title}
         </h3>
         <p className="text-xs text-muted-foreground">
-          {teams.length} {teams.length === 1 ? "team" : "teams"}
+          {teams.length}/{teamsPerBucket} teams
         </p>
       </div>
 
@@ -208,31 +249,6 @@ function GroupTable({ title, groupId, teams, allTeams, onEdit, onDelete, onChang
                 {/* Admin Actions */}
                 {isAdmin && (
                   <div className="flex items-center gap-1">
-                    {/* Move to other group dropdown */}
-                    {availableGroups.length > 0 && (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 px-2 hover:bg-amber-500/20 hover:text-amber-500 transition-colors text-xs font-display"
-                          >
-                            Move
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="bg-card border-border">
-                          {availableGroups.map((targetGroup) => (
-                            <DropdownMenuItem
-                              key={targetGroup}
-                              onClick={() => onChangeGroup(team.id, targetGroup)}
-                              className="font-display text-xs cursor-pointer"
-                            >
-                              Move to Group {targetGroup}
-                            </DropdownMenuItem>
-                          ))}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    )}
                     <Button
                       variant="ghost"
                       size="icon"
@@ -258,7 +274,7 @@ function GroupTable({ title, groupId, teams, allTeams, onEdit, onDelete, onChang
 
         {teams.length === 0 && (
           <div className="p-6 text-center text-muted-foreground/60 text-sm">
-            No teams in this group
+            No teams in this bucket
           </div>
         )}
       </div>
