@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Plus, Trophy, Users, Gamepad2, Shield, LogOut, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { TeamTable } from "@/components/TeamTable";
+import { TieredLeaderboard } from "@/components/TieredLeaderboard";
 import { TeamFormDialog } from "@/components/TeamFormDialog";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { MatchHistory } from "@/components/MatchHistory";
@@ -285,7 +285,7 @@ const Index = () => {
           </div>
         ) : (
           <div className="space-y-8">
-            <TeamTable
+            <TieredLeaderboard
               teams={teams}
               onEdit={handleEdit}
               onDelete={handleDelete}
