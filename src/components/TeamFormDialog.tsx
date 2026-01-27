@@ -16,6 +16,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Gamepad2, Save, Plus } from "lucide-react";
@@ -26,6 +33,7 @@ const teamSchema = z.object({
   wins: z.coerce.number().min(0, "Cannot be negative"),
   losses: z.coerce.number().min(0, "Cannot be negative"),
   points: z.coerce.number().min(0, "Cannot be negative"),
+  group_name: z.enum(["A", "B"]),
 });
 
 type TeamFormData = z.infer<typeof teamSchema>;
@@ -37,6 +45,7 @@ interface Team {
   wins: number;
   losses: number;
   points: number;
+  group_name: string;
 }
 
 interface TeamFormDialogProps {
@@ -62,6 +71,7 @@ export function TeamFormDialog({
       wins: 0,
       losses: 0,
       points: 0,
+      group_name: "A",
     },
   });
 
@@ -73,6 +83,7 @@ export function TeamFormDialog({
         wins: team.wins,
         losses: team.losses,
         points: team.points,
+        group_name: (team.group_name as "A" | "B") || "A",
       });
     } else {
       form.reset({
@@ -81,6 +92,7 @@ export function TeamFormDialog({
         wins: 0,
         losses: 0,
         points: 0,
+        group_name: "A",
       });
     }
   }, [team, form]);
@@ -142,6 +154,30 @@ export function TeamFormDialog({
                       className="bg-secondary border-border focus:border-primary font-body"
                     />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="group_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-display text-xs uppercase tracking-widest text-muted-foreground">
+                    Group
+                  </FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="bg-secondary border-border focus:border-primary font-display">
+                        <SelectValue placeholder="Select group" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="A" className="font-display">Group A</SelectItem>
+                      <SelectItem value="B" className="font-display">Group B</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}

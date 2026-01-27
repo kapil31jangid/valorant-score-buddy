@@ -1,7 +1,12 @@
-import { useMemo } from "react";
 import { cn } from "@/lib/utils";
-import { Edit2, Trash2, Trophy, TrendingUp, TrendingDown } from "lucide-react";
+import { Edit2, Trash2, Trophy, TrendingUp, TrendingDown, ArrowLeftRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Team {
   id: string;
@@ -10,49 +15,21 @@ interface Team {
   wins: number;
   losses: number;
   points: number;
+  group_name: string;
 }
 
 interface TieredLeaderboardProps {
   teams: Team[];
   onEdit: (team: Team) => void;
   onDelete: (id: string) => void;
+  onChangeGroup: (teamId: string, newGroup: string) => void;
   isAdmin?: boolean;
 }
 
-function shuffleArray<T>(array: T[], seed: number): T[] {
-  const shuffled = [...array];
-  let currentIndex = shuffled.length;
-  
-  // Use a seeded random for consistent shuffling per session
-  const seededRandom = () => {
-    seed = (seed * 9301 + 49297) % 233280;
-    return seed / 233280;
-  };
-
-  while (currentIndex !== 0) {
-    const randomIndex = Math.floor(seededRandom() * currentIndex);
-    currentIndex--;
-    [shuffled[currentIndex], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[currentIndex]];
-  }
-
-  return shuffled;
-}
-
-export function TieredLeaderboard({ teams, onEdit, onDelete, isAdmin = false }: TieredLeaderboardProps) {
-  // Split teams randomly into two groups
-  const { groupA, groupB } = useMemo(() => {
-    if (teams.length === 0) return { groupA: [], groupB: [] };
-    
-    // Use a fixed seed based on team IDs for consistent grouping
-    const seed = teams.reduce((acc, t) => acc + t.id.charCodeAt(0), 0);
-    const shuffled = shuffleArray(teams, seed);
-    
-    const midpoint = Math.ceil(shuffled.length / 2);
-    return {
-      groupA: shuffled.slice(0, midpoint),
-      groupB: shuffled.slice(midpoint),
-    };
-  }, [teams]);
+export function TieredLeaderboard({ teams, onEdit, onDelete, onChangeGroup, isAdmin = false }: TieredLeaderboardProps) {
+  // Split teams by their assigned group
+  const groupA = teams.filter(t => t.group_name === 'A');
+  const groupB = teams.filter(t => t.group_name === 'B');
 
   if (teams.length === 0) {
     return (
@@ -75,17 +52,21 @@ export function TieredLeaderboard({ teams, onEdit, onDelete, isAdmin = false }: 
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in">
       <GroupTable 
         title="Group A" 
+        groupId="A"
         teams={groupA} 
         onEdit={onEdit} 
-        onDelete={onDelete} 
+        onDelete={onDelete}
+        onChangeGroup={onChangeGroup}
         isAdmin={isAdmin}
         accentColor="cyan"
       />
       <GroupTable 
         title="Group B" 
+        groupId="B"
         teams={groupB} 
         onEdit={onEdit} 
-        onDelete={onDelete} 
+        onDelete={onDelete}
+        onChangeGroup={onChangeGroup}
         isAdmin={isAdmin}
         accentColor="primary"
       />
@@ -95,14 +76,16 @@ export function TieredLeaderboard({ teams, onEdit, onDelete, isAdmin = false }: 
 
 interface GroupTableProps {
   title: string;
+  groupId: string;
   teams: Team[];
   onEdit: (team: Team) => void;
   onDelete: (id: string) => void;
+  onChangeGroup: (teamId: string, newGroup: string) => void;
   isAdmin?: boolean;
   accentColor: "cyan" | "primary";
 }
 
-function GroupTable({ title, teams, onEdit, onDelete, isAdmin = false, accentColor }: GroupTableProps) {
+function GroupTable({ title, groupId, teams, onEdit, onDelete, onChangeGroup, isAdmin = false, accentColor }: GroupTableProps) {
   // Sort teams within group by points
   const sortedTeams = [...teams].sort((a, b) => {
     if (b.points !== a.points) return b.points - a.points;
@@ -125,6 +108,7 @@ function GroupTable({ title, teams, onEdit, onDelete, isAdmin = false, accentCol
   };
 
   const colors = colorClasses[accentColor];
+  const otherGroup = groupId === 'A' ? 'B' : 'A';
 
   return (
     <div className={cn(
@@ -223,6 +207,16 @@ function GroupTable({ title, teams, onEdit, onDelete, isAdmin = false, accentCol
                 {/* Admin Actions */}
                 {isAdmin && (
                   <div className="flex items-center gap-1">
+                    {/* Move to other group */}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onChangeGroup(team.id, otherGroup)}
+                      className="h-8 w-8 hover:bg-amber-500/20 hover:text-amber-500 transition-colors"
+                      title={`Move to Group ${otherGroup}`}
+                    >
+                      <ArrowLeftRight className="w-4 h-4" />
+                    </Button>
                     <Button
                       variant="ghost"
                       size="icon"

@@ -96,6 +96,7 @@ const Index = () => {
         wins: data.wins,
         losses: data.losses,
         points: data.points,
+        group_name: data.group_name || 'A',
       });
     } else {
       await addTeam({
@@ -104,9 +105,18 @@ const Index = () => {
         wins: data.wins,
         losses: data.losses,
         points: data.points,
+        group_name: data.group_name || 'A',
       });
     }
     setEditingTeam(null);
+  };
+
+  const handleChangeGroup = async (teamId: string, newGroup: string) => {
+    await updateTeam(teamId, { group_name: newGroup });
+    toast({
+      title: "Team moved",
+      description: `Team has been moved to Group ${newGroup}.`,
+    });
   };
 
   const totalTeams = teams.length;
@@ -289,6 +299,7 @@ const Index = () => {
               teams={teams}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              onChangeGroup={handleChangeGroup}
               isAdmin={isAdmin}
             />
             

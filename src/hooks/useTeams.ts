@@ -9,6 +9,7 @@ export interface Team {
   wins: number;
   losses: number;
   points: number;
+  group_name: string;
   created_at: string;
   updated_at: string;
 }
