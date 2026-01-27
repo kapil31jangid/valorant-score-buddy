@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Edit2, Trash2, Trophy, TrendingUp, TrendingDown, ArrowLeftRight } from "lucide-react";
+import { Edit2, Trash2, Trophy, TrendingUp, TrendingDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -7,6 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { getDisplayGroups, getSelectableGroups } from "@/lib/groupUtils";
 
 interface Team {
   id: string;
@@ -26,10 +27,20 @@ interface TieredLeaderboardProps {
   isAdmin?: boolean;
 }
 
+// Color palette for different groups
+const GROUP_COLORS: Record<string, { border: string; headerBg: string; title: string; glow: string }> = {
+  A: { border: "border-neon-cyan/50", headerBg: "from-cyan-500/20 to-cyan-600/5", title: "text-neon-cyan", glow: "shadow-cyan-500/20" },
+  B: { border: "border-primary/50", headerBg: "from-primary/20 to-primary/5", title: "text-primary", glow: "shadow-primary/20" },
+  C: { border: "border-amber-500/50", headerBg: "from-amber-500/20 to-amber-600/5", title: "text-amber-500", glow: "shadow-amber-500/20" },
+  D: { border: "border-emerald-500/50", headerBg: "from-emerald-500/20 to-emerald-600/5", title: "text-emerald-500", glow: "shadow-emerald-500/20" },
+  E: { border: "border-violet-500/50", headerBg: "from-violet-500/20 to-violet-600/5", title: "text-violet-500", glow: "shadow-violet-500/20" },
+  F: { border: "border-rose-500/50", headerBg: "from-rose-500/20 to-rose-600/5", title: "text-rose-500", glow: "shadow-rose-500/20" },
+};
+
+const DEFAULT_COLOR = { border: "border-muted/50", headerBg: "from-muted/20 to-muted/5", title: "text-muted-foreground", glow: "shadow-muted/20" };
+
 export function TieredLeaderboard({ teams, onEdit, onDelete, onChangeGroup, isAdmin = false }: TieredLeaderboardProps) {
-  // Split teams by their assigned group
-  const groupA = teams.filter(t => t.group_name === 'A');
-  const groupB = teams.filter(t => t.group_name === 'B');
+  const displayGroups = getDisplayGroups(teams);
 
   if (teams.length === 0) {
     return (
@@ -48,28 +59,32 @@ export function TieredLeaderboard({ teams, onEdit, onDelete, onChangeGroup, isAd
     );
   }
 
+  // Determine grid columns based on number of groups
+  const gridCols = displayGroups.length <= 2 ? "lg:grid-cols-2" : 
+                   displayGroups.length <= 3 ? "lg:grid-cols-3" : 
+                   "lg:grid-cols-2 xl:grid-cols-4";
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in">
-      <GroupTable 
-        title="Group A" 
-        groupId="A"
-        teams={groupA} 
-        onEdit={onEdit} 
-        onDelete={onDelete}
-        onChangeGroup={onChangeGroup}
-        isAdmin={isAdmin}
-        accentColor="cyan"
-      />
-      <GroupTable 
-        title="Group B" 
-        groupId="B"
-        teams={groupB} 
-        onEdit={onEdit} 
-        onDelete={onDelete}
-        onChangeGroup={onChangeGroup}
-        isAdmin={isAdmin}
-        accentColor="primary"
-      />
+    <div className={cn("grid grid-cols-1 gap-6 animate-fade-in", gridCols)}>
+      {displayGroups.map((groupId) => {
+        const groupTeams = teams.filter(t => t.group_name === groupId);
+        const colors = GROUP_COLORS[groupId] || DEFAULT_COLOR;
+        
+        return (
+          <GroupTable
+            key={groupId}
+            title={`Group ${groupId}`}
+            groupId={groupId}
+            teams={groupTeams}
+            allTeams={teams}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            onChangeGroup={onChangeGroup}
+            isAdmin={isAdmin}
+            colors={colors}
+          />
+        );
+      })}
     </div>
   );
 }
@@ -78,37 +93,23 @@ interface GroupTableProps {
   title: string;
   groupId: string;
   teams: Team[];
+  allTeams: Team[];
   onEdit: (team: Team) => void;
   onDelete: (id: string) => void;
   onChangeGroup: (teamId: string, newGroup: string) => void;
   isAdmin?: boolean;
-  accentColor: "cyan" | "primary";
+  colors: { border: string; headerBg: string; title: string; glow: string };
 }
 
-function GroupTable({ title, groupId, teams, onEdit, onDelete, onChangeGroup, isAdmin = false, accentColor }: GroupTableProps) {
+function GroupTable({ title, groupId, teams, allTeams, onEdit, onDelete, onChangeGroup, isAdmin = false, colors }: GroupTableProps) {
   // Sort teams within group by points
   const sortedTeams = [...teams].sort((a, b) => {
     if (b.points !== a.points) return b.points - a.points;
     return b.wins - a.wins;
   });
 
-  const colorClasses = {
-    cyan: {
-      border: "border-neon-cyan/50",
-      headerBg: "from-cyan-500/20 to-cyan-600/5",
-      title: "text-neon-cyan",
-      glow: "shadow-cyan-500/20",
-    },
-    primary: {
-      border: "border-primary/50",
-      headerBg: "from-primary/20 to-primary/5",
-      title: "text-primary",
-      glow: "shadow-primary/20",
-    },
-  };
-
-  const colors = colorClasses[accentColor];
-  const otherGroup = groupId === 'A' ? 'B' : 'A';
+  // Get available groups for moving teams
+  const availableGroups = getSelectableGroups(allTeams).filter(g => g !== groupId);
 
   return (
     <div className={cn(
@@ -207,16 +208,31 @@ function GroupTable({ title, groupId, teams, onEdit, onDelete, onChangeGroup, is
                 {/* Admin Actions */}
                 {isAdmin && (
                   <div className="flex items-center gap-1">
-                    {/* Move to other group */}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onChangeGroup(team.id, otherGroup)}
-                      className="h-8 w-8 hover:bg-amber-500/20 hover:text-amber-500 transition-colors"
-                      title={`Move to Group ${otherGroup}`}
-                    >
-                      <ArrowLeftRight className="w-4 h-4" />
-                    </Button>
+                    {/* Move to other group dropdown */}
+                    {availableGroups.length > 0 && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 px-2 hover:bg-amber-500/20 hover:text-amber-500 transition-colors text-xs font-display"
+                          >
+                            Move
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="bg-card border-border">
+                          {availableGroups.map((targetGroup) => (
+                            <DropdownMenuItem
+                              key={targetGroup}
+                              onClick={() => onChangeGroup(team.id, targetGroup)}
+                              className="font-display text-xs cursor-pointer"
+                            >
+                              Move to Group {targetGroup}
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
                     <Button
                       variant="ghost"
                       size="icon"
