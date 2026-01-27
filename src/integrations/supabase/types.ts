@@ -89,6 +89,7 @@ export type Database = {
       teams: {
         Row: {
           created_at: string
+          group_name: string | null
           id: string
           logo_url: string | null
           losses: number
@@ -99,6 +100,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          group_name?: string | null
           id?: string
           logo_url?: string | null
           losses?: number
@@ -109,6 +111,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          group_name?: string | null
           id?: string
           logo_url?: string | null
           losses?: number
