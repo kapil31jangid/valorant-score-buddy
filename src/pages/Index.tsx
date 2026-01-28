@@ -1,9 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Trophy, Swords, Target, ExternalLink, MapPin, Calendar, Shield, LogOut, Eye, EyeOff } from "lucide-react";
+import { Trophy, Swords, Target, ExternalLink, MapPin, Calendar, Shield, LogOut, Eye, EyeOff, Users, Trash2 } from "lucide-react";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { useAuth } from "@/hooks/useAuth";
 import { useEventSettings } from "@/hooks/useEventSettings";
+import { useAdmins } from "@/hooks/useAdmins";
 import { toast } from "sonner";
 import valorantAgents from "@/assets/valorant-agents-lineup.jpg";
 
@@ -11,6 +12,7 @@ const Index = () => {
   const navigate = useNavigate();
   const { user, isAdmin, loading, signOut } = useAuth();
   const { isEventActive, toggleEventStatus } = useEventSettings();
+  const { admins, loading: adminsLoading, removeAdmin } = useAdmins();
 
   const handleSignOut = async () => {
     const { error } = await signOut();
@@ -25,6 +27,21 @@ const Index = () => {
     await toggleEventStatus();
     toast.success(isEventActive ? "Scoreboard is now hidden" : "Scoreboard is now public");
   };
+
+  const handleRemoveAdmin = async (roleId: string, userId: string) => {
+    if (userId === user?.id) {
+      toast.error("You cannot remove yourself as admin");
+      return;
+    }
+    
+    const { error } = await removeAdmin(roleId);
+    if (error) {
+      toast.error("Failed to remove admin");
+    } else {
+      toast.success("Admin removed successfully");
+    }
+  };
+
   return (
     <div className="min-h-screen relative overflow-hidden bg-background">
       <AnimatedBackground />
@@ -152,7 +169,7 @@ const Index = () => {
 
         {/* Agents Section */}
         <main className="flex-1 px-4 py-12">
-          <div className="max-w-7xl mx-auto">
+          <div className="max-w-7xl mx-auto space-y-12">
             <div className="relative rounded-lg overflow-hidden border border-border/50 hover:border-valorant-red/50 transition-all duration-500 hover-glow-red">
               <img 
                 src={valorantAgents} 
@@ -161,6 +178,71 @@ const Index = () => {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
             </div>
+
+            {/* Admin Management Section - Only visible to admins */}
+            {isAdmin && (
+              <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-lg p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 bg-neon-cyan/20 rounded-lg flex items-center justify-center">
+                    <Users className="w-5 h-5 text-neon-cyan" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-display font-bold tracking-wider">ADMIN MANAGEMENT</h2>
+                    <p className="text-sm text-muted-foreground">Manage tournament administrators</p>
+                  </div>
+                </div>
+
+                {adminsLoading ? (
+                  <div className="text-center py-8 text-muted-foreground">Loading admins...</div>
+                ) : admins.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">No admins found</div>
+                ) : (
+                  <div className="space-y-3">
+                    {admins.map((admin) => (
+                      <div 
+                        key={admin.id}
+                        className="flex items-center justify-between p-4 bg-background/50 rounded-lg border border-border/30"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-valorant-red/20 rounded-full flex items-center justify-center">
+                            <Shield className="w-4 h-4 text-valorant-red" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-display text-foreground">
+                              {admin.user_id === user?.id ? "You" : `Admin ${admin.user_id.slice(0, 8)}...`}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              Added {new Date(admin.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                        {admin.user_id !== user?.id && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleRemoveAdmin(admin.id, admin.user_id)}
+                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="mt-6 pt-4 border-t border-border/30">
+                  <Button
+                    onClick={() => navigate('/auth')}
+                    variant="outline"
+                    className="w-full border-neon-cyan/50 text-neon-cyan hover:bg-neon-cyan/10 font-display"
+                  >
+                    <Shield className="w-4 h-4 mr-2" />
+                    ADD NEW ADMIN
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </main>
 
