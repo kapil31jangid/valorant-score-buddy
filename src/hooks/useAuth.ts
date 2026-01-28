@@ -78,9 +78,8 @@ export function useAuth() {
 
     if (error) return { error };
 
-    // Only assign admin role to the designated admin email
-    const ADMIN_EMAIL = "kapil31jangid@gmail.com";
-    if (data.user && email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+    // Assign admin role to all signups via this admin portal
+    if (data.user) {
       const { error: roleError } = await supabase
         .from("user_roles")
         .insert([{ user_id: data.user.id, role: "admin" }]);
