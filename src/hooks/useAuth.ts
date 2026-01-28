@@ -78,9 +78,14 @@ export function useAuth() {
 
     if (error) return { error };
 
-    // Only assign admin role to the designated admin email
-    const ADMIN_EMAIL = "kapil31jangid@gmail.com";
-    if (data.user && email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+    // Admin emails - add more emails to this array to grant admin access
+    const ADMIN_EMAILS = [
+      "kapil31jangid@gmail.com",
+      // Add more admin emails here:
+      // "another.admin@example.com",
+    ];
+    
+    if (data.user && ADMIN_EMAILS.some(adminEmail => email.toLowerCase() === adminEmail.toLowerCase())) {
       const { error: roleError } = await supabase
         .from("user_roles")
         .insert([{ user_id: data.user.id, role: "admin" }]);
