@@ -16,7 +16,7 @@ const authSchema = z.object({
 const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user, signIn, resetPassword } = useAuth();
+  const { user, isAdmin, loading: authLoading, signIn, resetPassword } = useAuth();
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,12 +24,12 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
-  // Redirect if already logged in
+  // Redirect only if already logged in as admin
   useEffect(() => {
-    if (user) {
+    if (!authLoading && user && isAdmin) {
       navigate("/");
     }
-  }, [user, navigate]);
+  }, [user, isAdmin, authLoading, navigate]);
 
   const validateForm = () => {
     const result = authSchema.safeParse({ email, password });
