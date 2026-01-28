@@ -81,7 +81,7 @@ const Index = () => {
                       SIGN OUT
                     </Button>
                   </>
-                ) : !user ? (
+                ) : (
                   <Button
                     onClick={() => navigate('/auth')}
                     variant="outline"
@@ -91,7 +91,7 @@ const Index = () => {
                     <Shield className="w-3 h-3 mr-1" />
                     ADMIN LOGIN
                   </Button>
-                ) : null}
+                )}
               </>
             )}
           </div>
