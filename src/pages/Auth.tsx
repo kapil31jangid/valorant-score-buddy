@@ -16,8 +16,7 @@ const authSchema = z.object({
 const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user, signIn, signUp, resetPassword } = useAuth();
-  const [isSignUp, setIsSignUp] = useState(false);
+  const { user, signIn, resetPassword } = useAuth();
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -88,53 +87,27 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      if (isSignUp) {
-        const { error } = await signUp(email, password);
-        if (error) {
-          if (error.message.includes("already registered")) {
-            toast({
-              title: "Sign up failed",
-              description: "This email is already registered. Please sign in instead.",
-              variant: "destructive",
-            });
-          } else {
-            toast({
-              title: "Sign up failed",
-              description: error.message,
-              variant: "destructive",
-            });
-          }
+      const { error } = await signIn(email, password);
+      if (error) {
+        if (error.message.includes("Invalid login credentials")) {
+          toast({
+            title: "Login failed",
+            description: "Invalid email or password. Please try again.",
+            variant: "destructive",
+          });
         } else {
           toast({
-            title: "Admin account created!",
-            description: "You can now sign in with your credentials.",
+            title: "Login failed",
+            description: error.message,
+            variant: "destructive",
           });
-          setIsSignUp(false);
-          setPassword("");
         }
       } else {
-        const { error } = await signIn(email, password);
-        if (error) {
-          if (error.message.includes("Invalid login credentials")) {
-            toast({
-              title: "Login failed",
-              description: "Invalid email or password. Please try again.",
-              variant: "destructive",
-            });
-          } else {
-            toast({
-              title: "Login failed",
-              description: error.message,
-              variant: "destructive",
-            });
-          }
-        } else {
-          toast({
-            title: "Welcome back!",
-            description: "You are now logged in as admin.",
-          });
-          navigate("/");
-        }
+        toast({
+          title: "Welcome back!",
+          description: "You are now logged in as admin.",
+        });
+        navigate("/");
       }
     } finally {
       setLoading(false);
@@ -161,8 +134,6 @@ const Auth = () => {
             <p className="text-muted-foreground text-sm">
               {isForgotPassword
                 ? "Enter your email to receive a reset link"
-                : isSignUp
-                ? "Create a new admin account"
                 : "Sign in to manage tournament scores"}
             </p>
           </div>
@@ -261,17 +232,15 @@ const Auth = () => {
               )}
             </div>
 
-            {!isSignUp && (
-              <div className="text-right">
-                <button
-                  type="button"
-                  onClick={() => setIsForgotPassword(true)}
-                  className="text-muted-foreground hover:text-primary text-xs"
-                >
-                  Forgot password?
-                </button>
-              </div>
-            )}
+            <div className="text-right">
+              <button
+                type="button"
+                onClick={() => setIsForgotPassword(true)}
+                className="text-muted-foreground hover:text-primary text-xs"
+              >
+                Forgot password?
+              </button>
+            </div>
 
             <Button
               type="submit"
@@ -281,22 +250,12 @@ const Auth = () => {
               {loading ? (
                 <div className="flex items-center gap-2">
                   <Gamepad2 className="w-4 h-4 animate-pulse" />
-                  {isSignUp ? "Creating account..." : "Signing in..."}
+                  Signing in...
                 </div>
               ) : (
-                isSignUp ? "Create Admin Account" : "Sign In"
+                "Sign In"
               )}
             </Button>
-
-            <div className="text-center">
-              <button
-                type="button"
-                onClick={() => setIsSignUp(!isSignUp)}
-                className="text-primary hover:text-primary/80 font-display uppercase tracking-wider text-xs"
-              >
-                {isSignUp ? "Already have an account? Sign In" : "Create Admin Account"}
-              </button>
-            </div>
           </form>
           )}
 
