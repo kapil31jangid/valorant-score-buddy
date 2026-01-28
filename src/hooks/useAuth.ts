@@ -81,8 +81,8 @@ export function useAuth() {
     // Admin emails - add more emails to this array to grant admin access
     const ADMIN_EMAILS = [
       "kapil31jangid@gmail.com",
-      // Add more admin emails here:
-      // "another.admin@example.com",
+      "shivammpatel.ai@gmail.com",
+      "ieeecs.wm@silveroakuni.ac.in",
     ];
     
     if (data.user && ADMIN_EMAILS.some(adminEmail => email.toLowerCase() === adminEmail.toLowerCase())) {
