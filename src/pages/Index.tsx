@@ -166,13 +166,13 @@ const Index = () => {
 
         {/* Footer */}
         <footer className="py-6 px-4 border-t border-border/30">
-          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 items-center gap-4">
-            <p className="text-xs text-muted-foreground/70 font-body text-center md:text-left">
+          <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            <p className="text-[10px] text-muted-foreground/70 font-body md:w-48">
               © IEEE SOU SB
             </p>
             
             {/* Social Links - Centered */}
-            <div className="flex items-center gap-6 justify-center">
+            <div className="flex items-center gap-6 flex-1 justify-center">
               <a 
                 href="https://www.linkedin.com/company/ieee-silveroakuni/" 
                 target="_blank" 
@@ -198,7 +198,7 @@ const Index = () => {
               </a>
             </div>
             
-            <span className="text-[10px] text-muted-foreground/70 font-display tracking-wider uppercase text-center md:text-right">
+            <span className="text-xs text-muted-foreground/70 font-display tracking-wider uppercase md:w-48 text-right">
               Powered by Silver Oak University
             </span>
           </div>
