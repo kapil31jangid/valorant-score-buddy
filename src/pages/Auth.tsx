@@ -119,6 +119,15 @@ const Auth = () => {
       <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent pointer-events-none" />
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[400px] h-[200px] bg-primary/20 blur-[100px] rounded-full pointer-events-none" />
 
+      {/* Login Status Indicator */}
+      {!authLoading && user && !isAdmin && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-orange-500/20 border border-orange-500/50 rounded-lg px-4 py-2 backdrop-blur-sm">
+          <p className="text-orange-400 text-xs font-display uppercase tracking-wider">
+            Logged in as: <span className="text-orange-300">{user.email}</span> (Not Admin)
+          </p>
+        </div>
+      )}
+
       <div className="w-full max-w-md relative">
         <div className="bg-card/80 backdrop-blur-sm border border-border rounded-sm p-8 border-glow-red">
           {/* Header */}
@@ -134,7 +143,9 @@ const Auth = () => {
             <p className="text-muted-foreground text-sm">
               {isForgotPassword
                 ? "Enter your email to receive a reset link"
-                : "Sign in to manage tournament scores"}
+                : user && !isAdmin
+                  ? "You're logged in but not as admin. Sign in with admin credentials."
+                  : "Sign in to manage tournament scores"}
             </p>
           </div>
 
